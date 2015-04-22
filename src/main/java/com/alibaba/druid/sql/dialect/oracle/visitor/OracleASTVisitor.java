@@ -36,7 +36,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.clause.OracleWithSubqueryEntry;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.PartitionExtensionClause;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.SampleClause;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.SearchClause;
-import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAggregateExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAnalytic;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAnalyticWindowing;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
@@ -53,7 +52,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleOuterExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleRangeExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSizeExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSysdateExpr;
-import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleTimestampExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterIndexStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterProcedureStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterSessionStatement;
@@ -62,7 +60,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableAddConstain
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableDropPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableModify;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableMoveTablespace;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableRenameTo;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableSplitPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableTruncatePartition;
@@ -123,8 +120,6 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public interface OracleASTVisitor extends SQLASTVisitor {
 
-    void endVisit(OracleAggregateExpr astNode);
-
     void endVisit(OraclePLSQLCommitStatement astNode);
 
     void endVisit(OracleAnalytic x);
@@ -165,11 +160,7 @@ public interface OracleASTVisitor extends SQLASTVisitor {
 
     void endVisit(OracleSelectUnPivot x);
 
-    void endVisit(OracleTimestampExpr x);
-
     void endVisit(OracleUpdateStatement x);
-
-    boolean visit(OracleAggregateExpr astNode);
 
     boolean visit(OraclePLSQLCommitStatement astNode);
 
@@ -210,8 +201,6 @@ public interface OracleASTVisitor extends SQLASTVisitor {
     boolean visit(OracleSelectSubqueryTableSource x);
 
     boolean visit(OracleSelectUnPivot x);
-
-    boolean visit(OracleTimestampExpr x);
 
     boolean visit(OracleUpdateStatement x);
 
@@ -462,10 +451,6 @@ public interface OracleASTVisitor extends SQLASTVisitor {
     boolean visit(OracleAlterTableAddConstaint x);
 
     void endVisit(OracleAlterTableAddConstaint x);
-
-    boolean visit(OracleAlterTableRenameTo x);
-
-    void endVisit(OracleAlterTableRenameTo x);
 
     boolean visit(OraclePrimaryKey x);
 

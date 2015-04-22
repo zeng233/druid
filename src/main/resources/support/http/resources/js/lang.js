@@ -76,7 +76,7 @@ druid.lang = function() {
 		'PollingConnectionInfo' : ['PollingConnection Info', '连接池中连接信息'],
 		'SQLList' : ['SQL List', 'sql列表'],
 				
-		'UserNameDesc' : ['Specify the username used when creating a new connection.', '指定建立连接是使用的用户名'],
+		'UserNameDesc' : ['Specify the username used when creating a new connection.', '指定建立连接时使用的用户名'],
 		'URLDesc' : ['The JDBC driver connection URL', 'jdbc连接字符串'],
 		'DbTypeDesc' : ['database type', '数据库类型'],
 		'DriverClassNameDesc' : ['The fully qualifed name of the JDBC driver class', 'jdbc驱动的类名'],
@@ -243,7 +243,8 @@ druid.lang = function() {
 		'RequestTimeMillis':['RequestTimeMillis', '请求时间'],
 		'JdbcExecutePeak':['JdbcExecutePeak', 'jdbc执行峰值'],
 		'JdbcFetchRowPeak':['JdbcFetchRowPeak', 'jdbc查询取回行数峰值'],
-		'JdbcUpdatePeak':['JdbcUpdatePeak', 'jdbc更新峰值']
+		'JdbcUpdatePeak':['JdbcUpdatePeak', 'jdbc更新峰值'],
+		'Histogram':['Histogram','区间分布']
 		
 	};
 	

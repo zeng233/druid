@@ -15,9 +15,6 @@
  */
 package com.alibaba.druid.wall.spi;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLObject;
@@ -43,6 +40,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitorAdapter;
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.wall.Violation;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallProvider;
@@ -50,16 +48,25 @@ import com.alibaba.druid.wall.WallVisitor;
 import com.alibaba.druid.wall.violation.ErrorCode;
 import com.alibaba.druid.wall.violation.IllegalSQLObjectViolation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PGWallVisitor extends PGASTVisitorAdapter implements WallVisitor {
 
     private final WallConfig      config;
     private final WallProvider    provider;
-    private final List<Violation> violations  = new ArrayList<Violation>();
-    private boolean               sqlModified = false;
+    private final List<Violation> violations      = new ArrayList<Violation>();
+    private boolean               sqlModified     = false;
+    private boolean               sqlEndOfComment = false;
 
     public PGWallVisitor(WallProvider provider){
         this.config = provider.getConfig();
         this.provider = provider;
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 
     @Override
@@ -113,8 +120,7 @@ public class PGWallVisitor extends PGASTVisitorAdapter implements WallVisitor {
     }
 
     public boolean visit(SQLBinaryOpExpr x) {
-        WallVisitorUtils.check(this, x);
-        return true;
+        return WallVisitorUtils.check(this, x);
     }
 
     @Override
@@ -127,11 +133,7 @@ public class PGWallVisitor extends PGASTVisitorAdapter implements WallVisitor {
     public boolean visit(SQLExprTableSource x) {
         WallVisitorUtils.check(this, x);
 
-        if (x.getExpr() instanceof SQLName) {
-            return false;
-        }
-
-        return true;
+        return !(x.getExpr() instanceof SQLName);
     }
 
     public boolean visit(SQLSelectGroupByClause x) {
@@ -274,5 +276,15 @@ public class PGWallVisitor extends PGASTVisitorAdapter implements WallVisitor {
     @Override
     public boolean visit(SQLCreateTriggerStatement x) {
         return false;
+    }
+    
+    @Override
+    public boolean isSqlEndOfComment() {
+        return this.sqlEndOfComment;
+    }
+
+    @Override
+    public void setSqlEndOfComment(boolean sqlEndOfComment) {
+        this.sqlEndOfComment = sqlEndOfComment;
     }
 }

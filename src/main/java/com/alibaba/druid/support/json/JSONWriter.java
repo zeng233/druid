@@ -15,21 +15,20 @@
  */
 package com.alibaba.druid.support.json;
 
+import com.alibaba.druid.util.Utils;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.TabularData;
-
-import com.alibaba.druid.util.Utils;
-
 public class JSONWriter {
 
     private StringBuilder    out;
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
     public JSONWriter(){
         this.out = new StringBuilder();
@@ -137,7 +136,8 @@ public class JSONWriter {
             writeNull();
             return;
         }
-
+        //SimpleDataFormat is not thread-safe, we need to make it local.
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         writeString(dateFormat.format(date));
     }
 
@@ -213,6 +213,15 @@ public class JSONWriter {
                 write("\\\\");
             } else if (c == '\t') {
                 write("\\t");
+            } else if (c < 16) {
+                write("\\u000");
+                write(Integer.toHexString(c));
+            } else if (c < 32) {
+                write("\\u00");
+                write(Integer.toHexString(c));
+            } else if (c >= 0x7f && c <= 0xA0) {
+                write("\\u00");
+                write(Integer.toHexString(c));
             } else {
                 write(c);
             }

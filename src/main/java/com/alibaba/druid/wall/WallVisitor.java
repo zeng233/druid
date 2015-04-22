@@ -37,4 +37,10 @@ public interface WallVisitor extends SQLASTVisitor {
     boolean isSqlModified();
 
     void setSqlModified(boolean sqlModified);
+    
+    String getDbType();
+    
+    boolean isSqlEndOfComment();
+
+    void setSqlEndOfComment(boolean sqlEndOfComment);
 }

@@ -58,6 +58,8 @@ import com.alibaba.druid.proxy.jdbc.NClobProxy;
 import com.alibaba.druid.proxy.jdbc.NClobProxyImpl;
 import com.alibaba.druid.proxy.jdbc.PreparedStatementProxy;
 import com.alibaba.druid.proxy.jdbc.PreparedStatementProxyImpl;
+import com.alibaba.druid.proxy.jdbc.ResultSetMetaDataProxy;
+import com.alibaba.druid.proxy.jdbc.ResultSetMetaDataProxyImpl;
 import com.alibaba.druid.proxy.jdbc.ResultSetProxy;
 import com.alibaba.druid.proxy.jdbc.ResultSetProxyImpl;
 import com.alibaba.druid.proxy.jdbc.StatementProxy;
@@ -965,7 +967,7 @@ public class FilterChainImpl implements FilterChain {
         if (this.pos < filterSize) {
             return nextFilter().resultSet_getMetaData(this, resultSet);
         }
-        return resultSet.getResultSetRaw().getMetaData();
+        return wrap(resultSet.getResultSetRaw().getMetaData(), resultSet);
     }
 
     @Override
@@ -4474,6 +4476,14 @@ public class FilterChainImpl implements FilterChain {
                                       statement.getLastExecuteSql());
     }
 
+    public ResultSetMetaDataProxy wrap(ResultSetMetaData metaData, ResultSetProxy resultSet) {
+        if (metaData == null) {
+            return null;
+        }
+
+        return new ResultSetMetaDataProxyImpl(metaData, dataSource.createMetaDataId(), resultSet);
+    }
+
     public ClobProxy wrap(ConnectionProxy conn, Clob clob) {
         if (clob == null) {
             return null;
@@ -4532,6 +4542,196 @@ public class FilterChainImpl implements FilterChain {
         }
 
         return dataSource.getConnectionDirect(maxWaitMillis);
+    }
+
+    @Override
+    public int resultSetMetaData_getColumnCount(ResultSetMetaDataProxy metaData) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnCount(this, metaData);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnCount();
+    }
+
+    @Override
+    public boolean resultSetMetaData_isAutoIncrement(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isAutoIncrement(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isAutoIncrement(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isCaseSensitive(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isCaseSensitive(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isCaseSensitive(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isSearchable(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isSearchable(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isSearchable(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isCurrency(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isCurrency(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isCurrency(column);
+    }
+
+    @Override
+    public int resultSetMetaData_isNullable(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isNullable(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isNullable(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isSigned(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isSigned(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isSigned(column);
+    }
+
+    @Override
+    public int resultSetMetaData_getColumnDisplaySize(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnDisplaySize(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnDisplaySize(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnLabel(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnLabel(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnLabel(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnName(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getSchemaName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getSchemaName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getSchemaName(column);
+    }
+
+    @Override
+    public int resultSetMetaData_getPrecision(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getPrecision(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getPrecision(column);
+    }
+
+    @Override
+    public int resultSetMetaData_getScale(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getScale(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getScale(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getTableName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getTableName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getTableName(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getCatalogName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getCatalogName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getCatalogName(column);
+    }
+
+    @Override
+    public int resultSetMetaData_getColumnType(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnType(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnType(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnTypeName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnTypeName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnTypeName(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isReadOnly(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isReadOnly(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isReadOnly(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isWritable(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isWritable(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isWritable(column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isDefinitelyWritable(ResultSetMetaDataProxy metaData, int column)
+                                                                                                      throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_isDefinitelyWritable(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().isDefinitelyWritable(column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnClassName(ResultSetMetaDataProxy metaData, int column) throws SQLException {
+        if (this.pos < filterSize) {
+            return nextFilter().resultSetMetaData_getColumnClassName(this, metaData, column);
+        }
+
+        return metaData.getResultSetMetaDataRaw().getColumnClassName(column);
     }
 
 }

@@ -17,16 +17,18 @@ package com.alibaba.druid.sql.dialect.postgresql.visitor;
 
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithClause;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithQuery;
-import com.alibaba.druid.sql.dialect.postgresql.ast.expr.PGParameter;
+import com.alibaba.druid.sql.dialect.postgresql.ast.expr.*;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGDeleteStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGFunctionTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.FetchClause;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.ForClause;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.PGLimit;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock.WindowClause;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGValuesQuery;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 
 public class PGASTVisitorAdapter extends SQLASTVisitorAdapter implements PGASTVisitor {
@@ -153,6 +155,146 @@ public class PGASTVisitorAdapter extends SQLASTVisitorAdapter implements PGASTVi
 
     @Override
     public boolean visit(PGFunctionTableSource x) {
+        return true;
+    }
+
+	@Override
+	public boolean visit(PGLimit x) {
+		return true;
+	}
+
+	@Override
+	public void endVisit(PGLimit x) {
+		
+	}
+	
+	@Override
+	public boolean visit(PGTypeCastExpr x) {
+	    return true;
+	}
+	
+	@Override
+	public void endVisit(PGTypeCastExpr x) {
+	    
+	}
+
+    @Override
+    public void endVisit(PGValuesQuery x) {
+        
+    }
+
+    @Override
+    public boolean visit(PGValuesQuery x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGArrayExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGArrayExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGExtractExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGExtractExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGBoxExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGBoxExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGPointExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGPointExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGMacAddrExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGMacAddrExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGInetExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGInetExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGCidrExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGCidrExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGPolygonExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGPolygonExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGCircleExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGCircleExpr x) {
+        return true;
+    }
+    
+    @Override
+    public void endVisit(PGLineSegmentsExpr x) {
+        
+    }
+    
+    @Override
+    public boolean visit(PGLineSegmentsExpr x) {
+        return true;
+    }
+
+    @Override
+    public void endVisit(PGIntervalExpr x) {
+
+    }
+
+    @Override
+    public boolean visit(PGIntervalExpr x) {
         return true;
     }
 

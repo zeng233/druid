@@ -92,7 +92,7 @@ public class SQLServerEvalVisitor extends SQLServerASTVisitorAdapter implements 
     public boolean visit(SQLNumberExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }
-
+    
     @Override
     public boolean visit(SQLCaseExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
@@ -134,6 +134,11 @@ public class SQLServerEvalVisitor extends SQLServerASTVisitorAdapter implements 
     @Override
     public void registerFunction(String funcName, Function function) {
         functions.put(funcName, function);
+    }
+    
+    @Override
+    public void unregisterFunction(String funcName) {
+        functions.remove(funcName);
     }
     
     public boolean visit(SQLIdentifierExpr x) {

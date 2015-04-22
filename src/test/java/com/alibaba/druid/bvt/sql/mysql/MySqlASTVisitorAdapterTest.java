@@ -2,14 +2,14 @@ package com.alibaba.druid.bvt.sql.mysql;
 
 import junit.framework.TestCase;
 
+import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBooleanExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlForceIndexHint;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlIgnoreIndexHint;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlKey;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlPrimaryKey;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlUnique;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlUseIndexHint;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBinaryExpr;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBooleanExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlIntervalExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOutFileExpr;
@@ -48,7 +48,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectGroupBy;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetCharSetStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetNamesStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetTransactionIsolationLevelStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetTransactionStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowAuthorsStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowBinLogEventsStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowBinaryLogsStatement;
@@ -101,13 +101,13 @@ public class MySqlASTVisitorAdapterTest extends TestCase {
 
     public void test_adapter() throws Exception {
         MySqlASTVisitorAdapter adapter = new MySqlASTVisitorAdapter();
-        new MySqlBooleanExpr().accept(adapter);
+        new SQLBooleanExpr().accept(adapter);
         new Limit().accept(adapter);
         new MySqlTableIndex().accept(adapter);
         new MySqlKey().accept(adapter);
         new MySqlPrimaryKey().accept(adapter);
         new MySqlIntervalExpr().accept(adapter);
-        new MySqlBinaryExpr().accept(adapter);
+        new SQLBinaryExpr().accept(adapter);
         new MySqlPrepareStatement().accept(adapter);
         new MySqlExecuteStatement().accept(adapter);
         new MySqlDeleteStatement().accept(adapter);
@@ -130,7 +130,7 @@ public class MySqlASTVisitorAdapterTest extends TestCase {
         new MySqlPartitionByKey().accept(adapter);
         new MySqlOutFileExpr().accept(adapter);
         new MySqlUpdateStatement().accept(adapter);
-        new MySqlSetTransactionIsolationLevelStatement().accept(adapter);
+        new MySqlSetTransactionStatement().accept(adapter);
         new MySqlSetNamesStatement().accept(adapter);
         new MySqlShowMasterLogsStatement().accept(adapter);
         new MySqlSetCharSetStatement().accept(adapter);

@@ -136,6 +136,11 @@ public class OracleEvalVisitor extends OracleASTVisitorAdapter implements SQLEva
         functions.put(funcName, function);
     }
     
+    @Override
+    public void unregisterFunction(String funcName) {
+        functions.remove(funcName);
+    }
+
     public boolean visit(SQLIdentifierExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }

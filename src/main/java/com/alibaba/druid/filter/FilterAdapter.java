@@ -15,6 +15,18 @@
  */
 package com.alibaba.druid.filter;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidPooledConnection;
+import com.alibaba.druid.proxy.jdbc.CallableStatementProxy;
+import com.alibaba.druid.proxy.jdbc.ClobProxy;
+import com.alibaba.druid.proxy.jdbc.ConnectionProxy;
+import com.alibaba.druid.proxy.jdbc.DataSourceProxy;
+import com.alibaba.druid.proxy.jdbc.PreparedStatementProxy;
+import com.alibaba.druid.proxy.jdbc.ResultSetMetaDataProxy;
+import com.alibaba.druid.proxy.jdbc.ResultSetProxy;
+import com.alibaba.druid.proxy.jdbc.StatementProxy;
+
+import javax.management.NotificationBroadcasterSupport;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -40,18 +52,6 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.management.NotificationBroadcasterSupport;
-
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidPooledConnection;
-import com.alibaba.druid.proxy.jdbc.CallableStatementProxy;
-import com.alibaba.druid.proxy.jdbc.ClobProxy;
-import com.alibaba.druid.proxy.jdbc.ConnectionProxy;
-import com.alibaba.druid.proxy.jdbc.DataSourceProxy;
-import com.alibaba.druid.proxy.jdbc.PreparedStatementProxy;
-import com.alibaba.druid.proxy.jdbc.ResultSetProxy;
-import com.alibaba.druid.proxy.jdbc.StatementProxy;
-
 /**
  * 提供JdbcFilter的基本实现，使得实现一个JdbcFilter更容易。
  * 
@@ -64,19 +64,19 @@ public abstract class FilterAdapter extends NotificationBroadcasterSupport imple
     }
 
     @Override
-    public void destory() {
+    public void destroy() {
 
     }
-    
+
     public void configFromProperties(Properties properties) {
-        
+
     }
-    
+
     @Override
     public boolean isWrapperFor(Class<?> iface) {
         return iface == this.getClass();
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> iface) {
         if (iface == this.getClass()) {
@@ -2721,5 +2721,132 @@ public abstract class FilterAdapter extends NotificationBroadcasterSupport imple
     public DruidPooledConnection dataSource_getConnection(FilterChain chain, DruidDataSource dataSource,
                                                           long maxWaitMillis) throws SQLException {
         return chain.dataSource_connect(dataSource, maxWaitMillis);
+    }
+
+    // ///////////////
+
+    @Override
+    public int resultSetMetaData_getColumnCount(FilterChain chain, ResultSetMetaDataProxy metaData) throws SQLException {
+        return chain.resultSetMetaData_getColumnCount(metaData);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isAutoIncrement(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                    throws SQLException {
+        return chain.resultSetMetaData_isAutoIncrement(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isCaseSensitive(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                    throws SQLException {
+        return chain.resultSetMetaData_isCaseSensitive(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isSearchable(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                 throws SQLException {
+        return chain.resultSetMetaData_isSearchable(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isCurrency(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                               throws SQLException {
+        return chain.resultSetMetaData_isCurrency(metaData, column);
+    }
+
+    @Override
+    public int resultSetMetaData_isNullable(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                           throws SQLException {
+        return chain.resultSetMetaData_isNullable(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isSigned(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                             throws SQLException {
+        return chain.resultSetMetaData_isSigned(metaData, column);
+    }
+
+    @Override
+    public int resultSetMetaData_getColumnDisplaySize(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                     throws SQLException {
+        return chain.resultSetMetaData_getColumnDisplaySize(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnLabel(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                  throws SQLException {
+        return chain.resultSetMetaData_getColumnLabel(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                 throws SQLException {
+        return chain.resultSetMetaData_getColumnName(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getSchemaName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                 throws SQLException {
+        return chain.resultSetMetaData_getSchemaName(metaData, column);
+    }
+
+    @Override
+    public int resultSetMetaData_getPrecision(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                             throws SQLException {
+        return chain.resultSetMetaData_getPrecision(metaData, column);
+    }
+
+    @Override
+    public int resultSetMetaData_getScale(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                         throws SQLException {
+        return chain.resultSetMetaData_getScale(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getTableName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                throws SQLException {
+        return chain.resultSetMetaData_getTableName(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getCatalogName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                  throws SQLException {
+        return chain.resultSetMetaData_getCatalogName(metaData, column);
+    }
+
+    @Override
+    public int resultSetMetaData_getColumnType(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                              throws SQLException {
+        return chain.resultSetMetaData_getColumnType(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnTypeName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                     throws SQLException {
+        return chain.resultSetMetaData_getColumnTypeName(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isReadOnly(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                               throws SQLException {
+        return chain.resultSetMetaData_isReadOnly(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isWritable(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                               throws SQLException {
+        return chain.resultSetMetaData_isWritable(metaData, column);
+    }
+
+    @Override
+    public boolean resultSetMetaData_isDefinitelyWritable(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                         throws SQLException {
+        return chain.resultSetMetaData_isDefinitelyWritable(metaData, column);
+    }
+
+    @Override
+    public String resultSetMetaData_getColumnClassName(FilterChain chain, ResultSetMetaDataProxy metaData, int column)
+                                                                                                                      throws SQLException {
+        return chain.resultSetMetaData_getColumnClassName(metaData, column);
     }
 }

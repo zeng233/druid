@@ -28,10 +28,12 @@ public interface JdbcConstants {
     public static final String DB2_DRIVER        = "COM.ibm.db2.jdbc.app.DB2Driver";
 
     public static final String POSTGRESQL        = "postgresql";
+    public static final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
 
     public static final String SYBASE            = "sybase";
 
     public static final String SQL_SERVER        = "sqlserver";
+    public static final String SQL_SERVER_DRIVER = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
 
     public static final String ORACLE            = "oracle";
     public static final String ORACLE_DRIVER     = "oracle.jdbc.driver.OracleDriver";
@@ -52,6 +54,22 @@ public interface JdbcConstants {
     public static final String HIVE              = "hive";
 
     public static final String H2                = "h2";
-
     public static final String H2_DRIVER         = "org.h2.Driver";
+
+    public static final String DM                = "dm";
+    public static final String DM_DRIVER         = "dm.jdbc.driver.DmDriver";
+    
+    public static final String KINGBASE          = "kingbase";
+    public static final String KINGBASE_DRIVER   = "com.kingbase.Driver";
+    
+    /**
+     * 阿里云odps
+     */
+    public static final String ODPS              = "odps";
+
+    /**
+     * Log4JDBC
+     */
+    public static final String LOG4JDBC          = "log4jdbc";
+    public static final String LOG4JDBC_DRIVER   = "net.sf.log4jdbc.DriverSpy";
 }

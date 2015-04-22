@@ -2,6 +2,8 @@ package com.alibaba.druid.bvt.sql.oracle.visitor;
 
 import junit.framework.TestCase;
 
+import com.alibaba.druid.sql.ast.expr.SQLTimestampExpr;
+import com.alibaba.druid.sql.ast.statement.SQLAlterTableRename;
 import com.alibaba.druid.sql.ast.statement.SQLDropSequenceStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.OracleDataTypeIntervalDay;
 import com.alibaba.druid.sql.dialect.oracle.ast.OracleDataTypeIntervalYear;
@@ -44,7 +46,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleIntervalExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleIsSetExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleRangeExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSizeExpr;
-import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleTimestampExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterIndexStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterProcedureStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterSessionStatement;
@@ -53,7 +54,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableAddConstain
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableDropPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableModify;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableMoveTablespace;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableRenameTo;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableSplitPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableTruncatePartition;
@@ -125,7 +125,7 @@ public class OracleASTVisitorAdapterTest extends TestCase {
         new CheckOption().accept(adapter);
         new ReadOnly().accept(adapter);
         new OracleSelectUnPivot().accept(adapter);
-        new OracleTimestampExpr().accept(adapter);
+        new SQLTimestampExpr().accept(adapter);
         new PartitionExtensionClause().accept(adapter);
         new VersionsFlashbackQueryClause().accept(adapter);
         new VersionsFlashbackQueryClause().accept(adapter);
@@ -210,7 +210,7 @@ public class OracleASTVisitorAdapterTest extends TestCase {
         new OracleAlterTableAddConstaint().accept(adapter);
         new OraclePrimaryKey().accept(adapter);
         new OracleCreateTableStatement().accept(adapter);
-        new OracleAlterTableRenameTo().accept(adapter);
+        new SQLAlterTableRename().accept(adapter);
         new OracleStorageClause().accept(adapter);
         new OracleGotoStatement().accept(adapter);
         new OracleLabelStatement().accept(adapter);

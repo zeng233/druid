@@ -136,6 +136,11 @@ public class DB2EvalVisitor extends DB2ASTVisitorAdapter implements SQLEvalVisit
         functions.put(funcName, function);
     }
     
+    @Override
+    public void unregisterFunction(String funcName) {
+        functions.remove(funcName);
+    }
+
     public boolean visit(SQLIdentifierExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }

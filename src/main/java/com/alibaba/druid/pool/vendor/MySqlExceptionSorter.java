@@ -15,21 +15,22 @@
  */
 package com.alibaba.druid.pool.vendor;
 
+import com.alibaba.druid.pool.ExceptionSorter;
+
 import java.sql.SQLException;
 import java.util.Properties;
-
-import com.alibaba.druid.pool.ExceptionSorter;
 
 public class MySqlExceptionSorter implements ExceptionSorter {
 
     @Override
     public boolean isExceptionFatal(SQLException e) {
-        String sqlState = e.getSQLState();
+        final String sqlState = e.getSQLState();
         final int errorCode = e.getErrorCode();
 
         if (sqlState != null && sqlState.startsWith("08")) {
             return true;
         }
+        
         switch (errorCode) {
         // Communications Errors
             case 1040: // ER_CON_COUNT_ERROR
@@ -55,7 +56,13 @@ public class MySqlExceptionSorter implements ExceptionSorter {
                 break;
         }
         
+        // for oceanbase
         if (errorCode >= -10000 && errorCode <= -9000) {
+            return true;
+        }
+        
+        String className = e.getClass().getName();
+        if ("com.mysql.jdbc.CommunicationsException".equals(className)) {
             return true;
         }
 
@@ -63,10 +70,10 @@ public class MySqlExceptionSorter implements ExceptionSorter {
         if (message != null && message.length() > 0) {
             final String errorText = message.toUpperCase();
 
-            if ((errorCode == 0 && (errorText.indexOf("COMMUNICATIONS LINK FAILURE") > -1) //
-            || errorText.indexOf("COULD NOT CREATE CONNECTION") > -1) //
-                || errorText.indexOf("NO DATASOURCE") > -1 //
-                || errorText.indexOf("NO ALIVE DATASOURCE") > -1) {
+            if ((errorCode == 0 && (errorText.contains("COMMUNICATIONS LINK FAILURE")) //
+            || errorText.contains("COULD NOT CREATE CONNECTION")) //
+                || errorText.contains("NO DATASOURCE") //
+                || errorText.contains("NO ALIVE DATASOURCE")) {
                 return true;
             }
         }

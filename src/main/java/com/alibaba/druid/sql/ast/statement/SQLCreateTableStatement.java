@@ -24,13 +24,21 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class SQLCreateTableStatement extends SQLStatementImpl implements SQLDDLStatement {
 
+    protected boolean               ifNotExiists     = false;
     protected Type                  type;
     protected SQLExprTableSource    tableSource;
 
     protected List<SQLTableElement> tableElementList = new ArrayList<SQLTableElement>();
 
+    // for postgresql
+    private SQLExprTableSource      inherits;
+
     public SQLCreateTableStatement(){
 
+    }
+
+    public SQLCreateTableStatement(String dbType){
+        super(dbType);
     }
 
     public SQLName getName() {
@@ -50,6 +58,9 @@ public class SQLCreateTableStatement extends SQLStatementImpl implements SQLDDLS
     }
 
     public void setTableSource(SQLExprTableSource tableSource) {
+        if (tableSource != null) {
+            tableSource.setParent(this);
+        }
         this.tableSource = tableSource;
     }
 
@@ -69,26 +80,23 @@ public class SQLCreateTableStatement extends SQLStatementImpl implements SQLDDLS
         return tableElementList;
     }
 
-    @Override
-    public void output(StringBuffer buf) {
-        buf.append("CREATE TABLE ");
-        if (Type.GLOBAL_TEMPORARY.equals(this.type)) {
-            buf.append("GLOBAL TEMPORARY ");
-        } else if (Type.LOCAL_TEMPORARY.equals(this.type)) {
-            buf.append("LOCAL TEMPORARY ");
-        }
+    public boolean isIfNotExiists() {
+        return ifNotExiists;
+    }
 
-        this.tableSource.output(buf);
-        buf.append(" ");
+    public void setIfNotExiists(boolean ifNotExiists) {
+        this.ifNotExiists = ifNotExiists;
+    }
 
-        buf.append("(");
-        for (int i = 0, size = tableElementList.size(); i < size; ++i) {
-            if (i != 0) {
-                buf.append(", ");
-            }
-            tableElementList.get(i).output(buf);
+    public SQLExprTableSource getInherits() {
+        return inherits;
+    }
+
+    public void setInherits(SQLExprTableSource inherits) {
+        if (inherits != null) {
+            inherits.setParent(this);
         }
-        buf.append(")");
+        this.inherits = inherits;
     }
 
     @Override
@@ -96,6 +104,7 @@ public class SQLCreateTableStatement extends SQLStatementImpl implements SQLDDLS
         if (visitor.visit(this)) {
             this.acceptChild(visitor, tableSource);
             this.acceptChild(visitor, tableElementList);
+            this.acceptChild(visitor, inherits);
         }
         visitor.endVisit(this);
     }

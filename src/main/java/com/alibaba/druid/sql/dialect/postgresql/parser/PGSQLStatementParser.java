@@ -22,7 +22,10 @@ import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLCurrentOfCursorExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
+import com.alibaba.druid.sql.ast.statement.SQLAlterTableAlterColumn;
+import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithClause;
@@ -100,7 +103,7 @@ public class PGSQLStatementParser extends SQLStatementParser {
 
         if (lexer.token() == (Token.LPAREN)) {
             lexer.nextToken();
-            this.exprParser.exprList(stmt.getColumns());
+            this.exprParser.exprList(stmt.getColumns(), stmt);
             accept(Token.RPAREN);
         }
 
@@ -110,7 +113,7 @@ public class PGSQLStatementParser extends SQLStatementParser {
             for (;;) {
                 accept(Token.LPAREN);
                 SQLInsertStatement.ValuesClause valuesCaluse = new SQLInsertStatement.ValuesClause();
-                this.exprParser.exprList(valuesCaluse.getValues());
+                this.exprParser.exprList(valuesCaluse.getValues(), valuesCaluse);
                 stmt.addValueCause(valuesCaluse);
 
                 accept(Token.RPAREN);
@@ -254,6 +257,8 @@ public class PGSQLStatementParser extends SQLStatementParser {
                 query = this.parseUpdateStatement();
             } else if (lexer.token() == Token.DELETE) {
                 query = this.parseDeleteStatement();
+            } else if (lexer.token() == Token.VALUES) {
+                query = this.parseSelect();
             } else {
                 throw new ParserException("syntax error, support token '" + lexer.token() + "'");
             }
@@ -266,7 +271,9 @@ public class PGSQLStatementParser extends SQLStatementParser {
     }
 
     public PGSelectStatement parseSelect() {
-        return new PGSelectStatement(createSQLSelectParser().select());
+        PGSelectParser selectParser = createSQLSelectParser();
+        SQLSelect select = selectParser.select();
+        return new PGSelectStatement(select);
     }
 
     public SQLStatement parseWith() {
@@ -282,6 +289,47 @@ public class PGSQLStatementParser extends SQLStatementParser {
             stmt.setWith(with);
             return stmt;
         }
+
+        if (lexer.token() == Token.DELETE) {
+            PGDeleteStatement stmt = this.parseDeleteStatement();
+            stmt.setWith(with);
+            return stmt;
+        }
         throw new ParserException("TODO");
+    }
+
+    protected SQLAlterTableAlterColumn parseAlterColumn() {
+        accept(Token.COLUMN);
+
+        SQLColumnDefinition column = this.exprParser.parseColumn();
+
+        SQLAlterTableAlterColumn alterColumn = new SQLAlterTableAlterColumn();
+        alterColumn.setColumn(column);
+
+        if (column.getDataType() == null && column.getConstraints().size() == 0) {
+            if (lexer.token() == Token.SET) {
+                lexer.nextToken();
+                if (lexer.token() == Token.NOT) {
+                    lexer.nextToken();
+                    accept(Token.NULL);
+                    alterColumn.setSetNotNull(true);
+                } else {
+                    accept(Token.DEFAULT);
+                    SQLExpr defaultValue = this.exprParser.expr();
+                    alterColumn.setSetDefault(defaultValue);
+                }
+            } else if (lexer.token() == Token.DROP) {
+                lexer.nextToken();
+                if (lexer.token() == Token.NOT) {
+                    lexer.nextToken();
+                    accept(Token.NULL);
+                    alterColumn.setDropNotNull(true);
+                } else {
+                    accept(Token.DEFAULT);
+                    alterColumn.setDropDefault(true);
+                }
+            }
+        }
+        return alterColumn;
     }
 }

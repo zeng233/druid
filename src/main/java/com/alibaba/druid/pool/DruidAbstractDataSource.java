@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,6 +49,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.sql.DataSource;
 
+import com.alibaba.druid.DruidRuntimeException;
 import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.filter.FilterChainImpl;
 import com.alibaba.druid.filter.FilterManager;
@@ -61,9 +63,9 @@ import com.alibaba.druid.support.logging.Log;
 import com.alibaba.druid.support.logging.LogFactory;
 import com.alibaba.druid.util.DruidPasswordCallback;
 import com.alibaba.druid.util.Histogram;
-import com.alibaba.druid.util.Utils;
 import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.StringUtils;
+import com.alibaba.druid.util.Utils;
 
 /**
  * @author wenshao<szujobs@hotmail.com>
@@ -118,6 +120,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     protected volatile int                             minIdle                                   = DEFAULT_MIN_IDLE;
     protected volatile int                             maxIdle                                   = DEFAULT_MAX_IDLE;
     protected volatile long                            maxWait                                   = DEFAULT_MAX_WAIT;
+    protected int                                      notFullTimeoutRetryCount                  = 0;
 
     protected volatile String                          validationQuery                           = DEFAULT_VALIDATION_QUERY;
     protected volatile int                             validationQueryTimeout                    = -1;
@@ -199,7 +202,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     protected final AtomicLong                         cachedPreparedStatementDeleteCount        = new AtomicLong();
     protected final AtomicLong                         cachedPreparedStatementMissCount          = new AtomicLong();
 
-    protected final Histogram                          transactionHistogram                      = new Histogram(
+    protected final Histogram                          transactionHistogram                      = new Histogram(1,
                                                                                                                  10,
                                                                                                                  100,
                                                                                                                  1000,
@@ -235,6 +238,11 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
     protected long                                     timeBetweenLogStatsMillis;
     protected DruidDataSourceStatLogger                statLogger                                = new DruidDataSourceStatLoggerImpl();
+    
+    private boolean                                    asyncCloseConnectionEnable                = false;
+    protected int                                      maxCreateTaskCount                        = 2;
+    protected ScheduledExecutorService                 destroyScheduler;
+    protected ScheduledExecutorService                 createScheduler;
 
     public DruidAbstractDataSource(boolean lockFair){
         lock = new ReentrantLock(lockFair);
@@ -529,6 +537,8 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     public void setMaxPoolPreparedStatementPerConnectionSize(int maxPoolPreparedStatementPerConnectionSize) {
         if (maxPoolPreparedStatementPerConnectionSize > 0) {
             this.poolPreparedStatements = true;
+        } else {
+            this.poolPreparedStatements = false;
         }
 
         this.maxPoolPreparedStatementPerConnectionSize = maxPoolPreparedStatementPerConnectionSize;
@@ -890,6 +900,15 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
         this.maxWait = maxWaitMillis;
     }
+    
+    public int getNotFullTimeoutRetryCount() {
+        return notFullTimeoutRetryCount;
+    }
+
+    
+    public void setNotFullTimeoutRetryCount(int notFullTimeoutRetryCount) {
+        this.notFullTimeoutRetryCount = notFullTimeoutRetryCount;
+    }
 
     public int getMinIdle() {
         return minIdle;
@@ -900,13 +919,8 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
             return;
         }
 
-        if (inited) {
-            if (value > this.maxActive) {
-                throw new IllegalArgumentException("minIdle greater than maxActive, " + maxActive + " < "
-                                                   + this.minIdle);
-            }
-
-            LOG.error("minIdle changed : " + this.minIdle + " -> " + value);
+        if (inited && value > this.maxActive) {
+            throw new IllegalArgumentException("minIdle greater than maxActive, " + maxActive + " < " + this.minIdle);
         }
 
         this.minIdle = value;
@@ -1180,7 +1194,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
         String[] filterArray = filters.split("\\,");
 
         for (String item : filterArray) {
-            FilterManager.loadFilter(this.filters, item);
+            FilterManager.loadFilter(this.filters, item.trim());
         }
     }
 
@@ -1317,6 +1331,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     protected final AtomicLong statementIdSeed   = new AtomicLong(20000);
     protected final AtomicLong resultSetIdSeed   = new AtomicLong(50000);
     protected final AtomicLong transactionIdSeed = new AtomicLong(60000);
+    protected final AtomicLong metaDataIdSeed    = new AtomicLong(80000);
 
     public long createConnectionId() {
         return connectionIdSeed.incrementAndGet();
@@ -1324,6 +1339,10 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
     public long createStatementId() {
         return statementIdSeed.getAndIncrement();
+    }
+
+    public long createMetaDataId() {
+        return metaDataIdSeed.getAndIncrement();
     }
 
     public long createResultSetId() {
@@ -1545,8 +1564,8 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
 
         // 25 - 29
         map.put("ResultSetOpenCount", stat.getResultSetStat().getOpenCount());
-        map.put("ResultSetOpenningCount", stat.getResultSetStat().getOpenningCount());
-        map.put("ResultSetOpenningMax", stat.getResultSetStat().getOpenningMax());
+        map.put("ResultSetOpenningCount", stat.getResultSetStat().getOpeningCount());
+        map.put("ResultSetOpenningMax", stat.getResultSetStat().getOpeningMax());
         map.put("ResultSetFetchRowCount", stat.getResultSetStat().getFetchRowCount());
         map.put("ResultSetLastOpenTime", stat.getResultSetStat().getLastOpenTime());
 
@@ -1664,7 +1683,63 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
         to.dupCloseLogEnable = this.dupCloseLogEnable;
         to.isOracle = this.isOracle;
         to.useOracleImplicitCache = this.useOracleImplicitCache;
+        to.asyncCloseConnectionEnable = this.asyncCloseConnectionEnable;
+        to.createScheduler = this.createScheduler;
+        to.destroyScheduler = this.destroyScheduler;
+    }
+    
+    public abstract void discardConnection(Connection realConnection);
+    
+
+    public boolean isAsyncCloseConnectionEnable() {
+        if (isRemoveAbandoned()) {
+            return true;
+        }
+        return asyncCloseConnectionEnable;
     }
 
-    public abstract void discardConnection(Connection realConnection);
+    public void setAsyncCloseConnectionEnable(boolean asyncCloseConnectionEnable) {
+        this.asyncCloseConnectionEnable = asyncCloseConnectionEnable;
+    }
+
+    public ScheduledExecutorService getCreateScheduler() {
+        return createScheduler;
+    }
+    
+    public void setCreateScheduler(ScheduledExecutorService createScheduler) {
+        if (isInited()) {
+            throw new DruidRuntimeException("dataSource inited.");
+        }
+        this.createScheduler = createScheduler;
+    }
+
+    public ScheduledExecutorService getDestroyScheduler() {
+        return destroyScheduler;
+    }
+
+    
+    public void setDestroyScheduler(ScheduledExecutorService destroyScheduler) {
+        if (isInited()) {
+            throw new DruidRuntimeException("dataSource inited.");
+        }
+        this.destroyScheduler = destroyScheduler;
+    }
+
+    public boolean isInited() {
+        return this.inited;
+    }
+
+    
+    public int getMaxCreateTaskCount() {
+        return maxCreateTaskCount;
+    }
+
+    
+    public void setMaxCreateTaskCount(int maxCreateTaskCount) {
+        if (maxCreateTaskCount < 1) {
+            throw new IllegalArgumentException();
+        }
+        
+        this.maxCreateTaskCount = maxCreateTaskCount;
+    }
 }

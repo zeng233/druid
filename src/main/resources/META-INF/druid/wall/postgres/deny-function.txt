@@ -18,3 +18,9 @@ pg_trigger_depth
 session_user
 user
 version
+pg_sleep
+pg_sleep_for
+pg_sleep_until
+current_setting
+set_config
+

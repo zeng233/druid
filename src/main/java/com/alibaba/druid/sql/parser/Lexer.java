@@ -64,11 +64,15 @@ public class Lexer {
     /*
      * anti sql injection
      */
-    private boolean        allowComment = true;
+    private boolean          allowComment = true;
 
-    private int            varIndex     = -1;
+    private int              varIndex     = -1;
 
     protected CommentHandler commentHandler;
+
+    protected boolean        hasComment   = false;
+
+    protected boolean        endOfComment = false;
 
     public Lexer(String input){
         this(input, true);
@@ -173,7 +177,7 @@ public class Lexer {
     protected final void scanChar() {
         ch = charAt(++pos);
     }
-
+    
     protected void unscan() {
         ch = charAt(--pos);
     }
@@ -369,7 +373,7 @@ public class Lexer {
                     return;
                 case '.':
                     scanChar();
-                    if (isDigit(ch)) {
+                    if (isDigit(ch) && !isFirstIdentifierChar(charAt(pos - 2))) {
                         unscan();
                         scanNumber();
                         return;
@@ -494,7 +498,15 @@ public class Lexer {
                 scanChar();
                 if (ch == '|') {
                     scanChar();
-                    token = Token.BARBAR;
+                    if (ch == '/') {
+                        scanChar();
+                        token = Token.BARBARSLASH; 
+                    } else {
+                        token = Token.BARBAR;
+                    }
+                } else if (ch == '/') {
+                    scanChar();
+                    token = Token.BARSLASH;
                 } else {
                     token = Token.BAR;
                 }
@@ -559,6 +571,9 @@ public class Lexer {
                 } else if (ch == '<') {
                     scanChar();
                     token = Token.BANGLT;
+                } else if (ch == '!') {
+                    scanChar();
+                    token = Token.BANGBANG; // postsql
                 } else {
                     token = Token.BANG;
                 }
@@ -630,6 +645,7 @@ public class Lexer {
             buf = new char[32];
         }
 
+        boolean hasSpecial = false;
         for (;;) {
             if (isEOF()) {
                 lexError("unclosed.str.lit");
@@ -637,21 +653,32 @@ public class Lexer {
             }
 
             ch = charAt(++pos);
+            
+            if(ch == '\\') {
+                hasSpecial = true;
+                continue;
+            }
 
-            if (ch == '\"') {
+            if (ch == '\"' && charAt(pos - 1) != '\\') {
                 scanChar();
                 token = LITERAL_ALIAS;
                 break;
             }
-
+            
             if (bufPos == buf.length) {
                 putChar(ch);
             } else {
                 buf[bufPos++] = ch;
             }
         }
+        
+        if (!hasSpecial) {
+            stringVal = subString(mark + 1, bufPos);
+        } else {
+            stringVal = new String(buf, 0, bufPos);
+        }
 
-        stringVal = subString(mark + 1, bufPos);
+        //stringVal = subString(mark + 1, bufPos);
     }
     
     public void scanSharp() {
@@ -667,7 +694,6 @@ public class Lexer {
         bufPos = 1;
         char ch;
 
-        boolean mybatisFlag = false;
         if (charAt(pos + 1) == '@') {
             ch = charAt(++pos);
 
@@ -675,7 +701,29 @@ public class Lexer {
         } else if (charAt(pos + 1) == '{') {
             pos++;
             bufPos++;
-            mybatisFlag = true;
+            
+            for (;;) {
+                ch = charAt(++pos);
+
+                if (ch == '}') {
+                    break;
+                }
+
+                bufPos++;
+                continue;
+            }
+            
+            if (ch != '}') {
+                throw new ParserException("syntax error");
+            }
+            ++pos;
+            bufPos++;
+            
+            this.ch = charAt(pos);
+
+            stringVal = addSymbol();
+            token = Token.VARIANT;
+            return;
         }
 
         for (;;) {
@@ -689,14 +737,6 @@ public class Lexer {
             continue;
         }
 
-        if (mybatisFlag) {
-            if (ch != '}') {
-                throw new ParserException("syntax error");
-            }
-            ++pos;
-            bufPos++;
-        }
-
         this.ch = charAt(pos);
 
         stringVal = addSymbol();
@@ -708,64 +748,75 @@ public class Lexer {
             throw new NotAllowCommentException();
         }
 
-        if (ch != '/') {
+        if ((ch == '/' && charAt(pos + 1) == '/')
+                || (ch == '-' && charAt(pos + 1) == '-')) {
+            scanSingleLineComment();
+        } else if (ch == '/' && charAt(pos + 1) == '*') {
+            scanMultiLineComment();
+        } else {
             throw new IllegalStateException();
         }
+    }
 
+    private void scanMultiLineComment() {
+        scanChar();
+        scanChar();
         mark = pos;
         bufPos = 0;
+
+        for (;;) {
+            if (ch == '*' && charAt(pos + 1) == '/') {
+                scanChar();
+                scanChar();
+                break;
+            }
+            
+			// multiline comment结束符错误
+			if (ch == EOI) {
+				throw new ParserException("unterminated /* comment.");
+			}
+            scanChar();
+            bufPos++;
+        }
+
+        stringVal = subString(mark, bufPos);
+        token = Token.MULTI_LINE_COMMENT;
+        hasComment = true;
+    }
+
+    private void scanSingleLineComment() {
         scanChar();
+        scanChar();
+        mark = pos;
+        bufPos = 0;
 
-        if (ch == '*') {
-            scanChar();
-            bufPos++;
-
-            for (;;) {
-                if (ch == '*' && charAt(pos + 1) == '/') {
-                    bufPos += 2;
-                    scanChar();
+        for (;;) {
+            if (ch == '\r') {
+                if (charAt(pos + 1) == '\n') {
                     scanChar();
                     break;
                 }
-
-                scanChar();
                 bufPos++;
+                break;
             }
 
-            stringVal = subString(mark, bufPos);
-            token = Token.MULTI_LINE_COMMENT;
-            return;
-        }
+            if (ch == '\n') {
+                scanChar();
+                break;
+            }
+            
+			// single line comment结束符错误
+			if (ch == EOI) {
+				throw new ParserException("syntax error at end of input.");
+			}
 
-        if (ch == '/') {
             scanChar();
             bufPos++;
-
-            for (;;) {
-                if (ch == '\r') {
-                    if (charAt(pos + 1) == '\n') {
-                        bufPos += 2;
-                        scanChar();
-                        break;
-                    }
-                    bufPos++;
-                    break;
-                }
-
-                if (ch == '\n') {
-                    scanChar();
-                    bufPos++;
-                    break;
-                }
-
-                scanChar();
-                bufPos++;
-            }
-
-            stringVal = subString(mark + 1, bufPos);
-            token = Token.LINE_COMMENT;
-            return;
         }
+
+        stringVal = subString(mark, bufPos);
+        token = Token.LINE_COMMENT;
+        hasComment = true;
     }
 
     public void scanIdentifier() {
@@ -1025,11 +1076,52 @@ public class Lexer {
     }
 
     public BigDecimal decimalValue() {
-        return new BigDecimal(text.toCharArray(), mark, bufPos);
+        return new BigDecimal(subString(mark, bufPos).toCharArray());
     }
 
     public static interface CommentHandler {
 
         boolean handle(Token lastToken, String comment);
     }
+
+    public boolean isHasComment() {
+        return hasComment;
+    }
+    
+    public void skipToEOF() {
+        pos = text.length();
+        this.token = Token.EOF;
+    }
+
+    public boolean isEndOfComment() {
+        return endOfComment;
+    }
+    
+    protected boolean isSafeComment(String comment) {
+        if (comment == null) {
+            return true;
+        }
+        comment = comment.toLowerCase();
+        if (comment.indexOf("select") != -1 //
+            || comment.indexOf("delete") != -1 //
+            || comment.indexOf("insert") != -1 //
+            || comment.indexOf("update") != -1 //
+            || comment.indexOf("into") != -1 //
+            || comment.indexOf("where") != -1 //
+            || comment.indexOf("or") != -1 //
+            || comment.indexOf("and") != -1 //
+            || comment.indexOf("union") != -1 //
+            || comment.indexOf('\'') != -1 //
+            || comment.indexOf('=') != -1 //
+            || comment.indexOf('>') != -1 //
+            || comment.indexOf('<') != -1 //
+            || comment.indexOf('&') != -1 //
+            || comment.indexOf('|') != -1 //
+            || comment.indexOf('^') != -1 //
+        ) {
+            return false;
+        }
+        return true;
+    }
+
 }

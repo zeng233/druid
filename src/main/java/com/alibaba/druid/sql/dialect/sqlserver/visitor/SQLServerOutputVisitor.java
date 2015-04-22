@@ -17,17 +17,32 @@ package com.alibaba.druid.sql.dialect.sqlserver.visitor;
 
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLSetQuantifier;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLAssignItem;
 import com.alibaba.druid.sql.ast.statement.SQLColumnConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLGrantStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerColumnDefinition;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerColumnDefinition.Identity;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerDeclareItem;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerOutput;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelect;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerTop;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.expr.SQLServerObjectReferenceExpr;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerBlockStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerCommitStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerDeclareStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerExecStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerIfStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerIfStatement.Else;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerInsertStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerRollbackStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerSetStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerSetTransactionIsolationLevelStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerUpdateStatement;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerWaitForStatement;
 import com.alibaba.druid.sql.visitor.SQLASTOutputVisitor;
 
 public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLServerASTVisitor {
@@ -92,7 +107,7 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
 
         boolean paren = false;
 
-        if (x.getParent() instanceof SQLServerUpdateStatement) {
+        if (x.getParent() instanceof SQLServerUpdateStatement || x.getParent() instanceof SQLServerInsertStatement) {
             paren = true;
             print("(");
         }
@@ -128,8 +143,16 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
 
     @Override
     public boolean visit(SQLServerInsertStatement x) {
-        print("INSERT INTO ");
+        print("INSERT ");
 
+        if (x.getTop() != null) {
+            x.getTop().setParent(x);
+            x.getTop().accept(this);
+            print(' ');
+        }
+        
+        print("INTO ");
+        
         x.getTableSource().accept(this);
 
         if (x.getColumns().size() > 0) {
@@ -149,6 +172,12 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
             print(")");
             decrementIndent();
         }
+        
+        if (x.getOutput() != null) {
+            println();
+            x.getOutput().setParent(x);
+            x.getOutput().accept(this);
+        }
 
         if (x.getValuesList().size() != 0) {
             println();
@@ -167,7 +196,7 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
             println();
             x.getQuery().accept(this);
         }
-        
+
         if (x.isDefaultValues()) {
             print(" DEFAULT VALUES");
         }
@@ -198,6 +227,12 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
                 print(", ");
             }
             x.getItems().get(i).accept(this);
+        }
+        
+        if (x.getOutput() != null) {
+            println();
+            x.getOutput().setParent(x);
+            x.getOutput().accept(this);
         }
 
         if (x.getFrom() != null) {
@@ -267,7 +302,7 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
             visitColumnDefault(x);
         }
 
-        for (SQLColumnConstraint item : x.getConstaints()) {
+        for (SQLColumnConstraint item : x.getConstraints()) {
             print(' ');
             item.accept(this);
         }
@@ -301,6 +336,13 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
     @Override
     public boolean visit(SQLServerExecStatement x) {
         print("EXEC ");
+        
+        SQLName returnStatus = x.getReturnStatus();
+        if (returnStatus != null) {
+            returnStatus.accept(this);
+            print(" = ");
+        }
+        
         SQLName moduleName = x.getModuleName();
         if (moduleName != null) {
             moduleName.accept(this);
@@ -319,5 +361,331 @@ public class SQLServerOutputVisitor extends SQLASTOutputVisitor implements SQLSe
     @Override
     public void endVisit(SQLServerExecStatement x) {
 
+    }
+
+    @Override
+    public boolean visit(SQLServerSetTransactionIsolationLevelStatement x) {
+        print("SET TRANSACTION ISOLATION LEVEL ");
+        print(x.getLevel());
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerSetTransactionIsolationLevelStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(SQLServerSetStatement x) {
+        print("SET ");
+        SQLAssignItem item = x.getItem();
+        item.getTarget().accept(this);
+        print(" ");
+        item.getValue().accept(this);
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerSetStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(SQLServerOutput x) {
+        print("OUTPUT ");
+        printSelectList(x.getSelectList());
+
+        if (x.getInto() != null) {
+            incrementIndent();
+            println();
+            print("INTO ");
+            x.getInto().accept(this);
+
+            if (x.getColumns().size() > 0) {
+                incrementIndent();
+                println();
+                print("(");
+                for (int i = 0, size = x.getColumns().size(); i < size; ++i) {
+                    if (i != 0) {
+                        if (i % 5 == 0) {
+                            println();
+                        }
+                        print(", ");
+                    }
+
+                    x.getColumns().get(i).accept(this);
+                }
+                print(")");
+                decrementIndent();
+            }
+        }
+        decrementIndent();
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerOutput x) {
+
+    }
+
+    @Override
+    public boolean visit(SQLServerDeclareItem x) {
+        x.getName().accept(this);
+        
+        if(x.getType() == SQLServerDeclareItem.Type.TABLE) {
+            print(" TABLE");
+            int size = x.getTableElementList().size();
+
+            if (size > 0) {
+                print(" (");
+                incrementIndent();
+                println();
+                for (int i = 0; i < size; ++i) {
+                    if (i != 0) {
+                        print(",");
+                        println();
+                    }
+                    x.getTableElementList().get(i).accept(this);
+                }
+                decrementIndent();
+                println();
+                print(")");
+            }
+        } else if (x.getType() == SQLServerDeclareItem.Type.CURSOR) {
+            print(" CURSOR");
+        } else {
+            print(" ");
+            x.getDataType().accept(this);
+            if (x.getValue() != null) {
+                print(" = ");
+                x.getValue().accept(this);
+            }
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerDeclareItem x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerDeclareStatement x) {
+        print("DECLARE ");
+        this.printAndAccept(x.getItems(), ", ");
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerDeclareStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(Else x) {
+        print("ELSE");
+        incrementIndent();
+        println();
+
+        for (int i = 0, size = x.getStatements().size(); i < size; ++i) {
+            if (i != 0) {
+                println();
+            }
+            SQLStatement item = x.getStatements().get(i);
+            item.setParent(x);
+            item.accept(this);
+        }
+
+        decrementIndent();
+        return false;
+    }
+
+    @Override
+    public void endVisit(Else x) {
+
+    }
+
+    @Override
+    public boolean visit(SQLServerIfStatement x) {
+        print("IF ");
+        x.getCondition().accept(this);
+        incrementIndent();
+        println();
+        for (int i = 0, size = x.getStatements().size(); i < size; ++i) {
+            SQLStatement item = x.getStatements().get(i);
+            item.setParent(x);
+            item.accept(this);
+            if (i != size - 1) {
+                println();
+            }
+        }
+        decrementIndent();
+
+        if (x.getElseItem() != null) {
+            println();
+            x.getElseItem().accept(this);
+        }
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerIfStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(SQLServerBlockStatement x) {
+        print("BEGIN");
+        incrementIndent();
+        println();
+        for (int i = 0, size = x.getStatementList().size(); i < size; ++i) {
+            if (i != 0) {
+                println();
+            }
+            SQLStatement stmt = x.getStatementList().get(i);
+            stmt.setParent(x);
+            stmt.accept(this);
+            print(";");
+        }
+        decrementIndent();
+        println();
+        print("END");
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerBlockStatement x) {
+
+    }
+    
+    @Override
+    protected void printGrantOn(SQLGrantStatement x) {
+        if (x.getOn() != null) {
+            print(" ON ");
+
+            if (x.getObjectType() != null) {
+                print(x.getObjectType().name());
+                print("::");
+            }
+
+            x.getOn().accept(this);
+        }
+    }
+    
+    @Override
+    public void endVisit(SQLServerSelect x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerSelect x) {
+        super.visit(x);
+        if (x.isForBrowse()) {
+            println();
+            print("FOR BROWSE");
+        }
+        
+        if (x.getForXmlOptions().size() > 0) {
+            println();
+            print("FOR XML ");
+            for (int i = 0; i < x.getForXmlOptions().size(); ++i) {
+                if (i != 0) {
+                    print(", ");
+                    print(x.getForXmlOptions().get(i));
+                }
+            }
+        }
+        
+        if (x.getOffset() != null) {
+            println();
+            print("OFFSET ");
+            x.getOffset().accept(this);
+            print(" ROWS");
+            
+            if (x.getRowCount() != null) {
+                print(" FETCH NEXT ");
+                x.getRowCount().accept(this);
+                print(" ROWS ONLY");
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean visit(SQLServerCommitStatement x) {
+        print("COMMIT");
+
+        if (x.isWork()) {
+            print(" WORK");
+        } else {
+            print(" TRANSACTION");
+            if (x.getTransactionName() != null) {
+                print(" ");
+                x.getTransactionName().accept(this);
+            }
+            if (x.getDelayedDurability() != null) {
+                print(" WITH ( DELAYED_DURABILITY = ");
+                x.getDelayedDurability().accept(this);
+                print(" )");
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerCommitStatement x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerRollbackStatement x) {
+        print("ROLLBACK");
+
+        if (x.isWork()) {
+            print(" WORK");
+        } else {
+            print(" TRANSACTION");
+            if (x.getName() != null) {
+                print(" ");
+                x.getName().accept(this);
+            }
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerRollbackStatement x) {
+        
+    }
+
+    @Override
+    public boolean visit(SQLServerWaitForStatement x) {
+        print("WAITFOR");
+
+        if (x.getDelay() != null) {
+            print(" DELAY ");
+            x.getDelay().accept(this);
+        } else if (x.getTime() != null) {
+            print(" TIME ");
+            x.getTime().accept(this);
+        } if (x.getStatement() != null) {
+            print(" DELAY ");
+            x.getStatement().accept(this);
+        }
+        
+        if(x.getTimeout() != null) {
+            print(" ,TIMEOUT ");
+            x.getTimeout().accept(this);
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void endVisit(SQLServerWaitForStatement x) {
+        
     }
 }

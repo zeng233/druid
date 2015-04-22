@@ -15,6 +15,15 @@
  */
 package com.alibaba.druid.pool;
 
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
+import com.alibaba.druid.util.JdbcConstants;
+import com.alibaba.druid.util.JdbcUtils;
+import com.alibaba.druid.util.Utils;
+
+import javax.sql.ConnectionEventListener;
+import javax.sql.StatementEventListener;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,14 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.sql.ConnectionEventListener;
-import javax.sql.StatementEventListener;
-
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
-import com.alibaba.druid.util.Utils;
-import com.alibaba.druid.util.JdbcConstants;
 
 /**
  * @author wenshao<szujobs@hotmail.com>
@@ -42,7 +43,7 @@ public final class DruidConnectionHolder {
     private final Connection                    conn;
     private final List<ConnectionEventListener> connectionEventListeners = new CopyOnWriteArrayList<ConnectionEventListener>();
     private final List<StatementEventListener>  statementEventListeners  = new CopyOnWriteArrayList<StatementEventListener>();
-    private final long                          connecttimeMillis;
+    private final long                          connectTimeMillis;
     private transient long                      lastActiveTimeMillis;
     private long                                useCount                 = 0;
 
@@ -61,18 +62,20 @@ public final class DruidConnectionHolder {
     private int                                 underlyingTransactionIsolation;
     private boolean                             underlyingAutoCommit;
     private boolean                             discard                  = false;
+    
+    public static boolean                       holdabilityUnsupported   = false;
 
     public DruidConnectionHolder(DruidAbstractDataSource dataSource, Connection conn) throws SQLException{
 
         this.dataSource = dataSource;
         this.conn = conn;
-        this.connecttimeMillis = System.currentTimeMillis();
-        this.lastActiveTimeMillis = connecttimeMillis;
+        this.connectTimeMillis = System.currentTimeMillis();
+        this.lastActiveTimeMillis = connectTimeMillis;
 
         this.underlyingAutoCommit = conn.getAutoCommit();
 
         {
-            boolean initUnderlyHoldability = true;
+            boolean initUnderlyHoldability = !holdabilityUnsupported;
             if (JdbcConstants.SYBASE.equals(dataSource.getDbType()) //
                 || JdbcConstants.DB2.equals(dataSource.getDbType()) //
             ) {
@@ -81,6 +84,9 @@ public final class DruidConnectionHolder {
             if (initUnderlyHoldability) {
                 try {
                     this.underlyingHoldability = conn.getHoldability();
+                } catch (UnsupportedOperationException e) {
+                    holdabilityUnsupported = true;
+                    LOG.warn("getHoldability unsupported", e);
                 } catch (SQLException e) {
                     LOG.warn("getHoldability error", e);
                 }
@@ -91,10 +97,8 @@ public final class DruidConnectionHolder {
         try {
             this.underlyingTransactionIsolation = conn.getTransactionIsolation();
         } catch (SQLException e) {
-            if (!"com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException".equals(e.getClass().getName())) { // compatible
-                                                                                                               // for
-                                                                                                               // alibaba
-                                                                                                               // corba
+            // compartible for alibaba corba
+            if (!"com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException".equals(e.getClass().getName())) { 
                 throw e;
             }
         }
@@ -192,7 +196,7 @@ public final class DruidConnectionHolder {
     }
 
     public long getTimeMillis() {
-        return connecttimeMillis;
+        return connectTimeMillis;
     }
 
     public long getUseCount() {
@@ -230,7 +234,7 @@ public final class DruidConnectionHolder {
 
         for (Object item : statementTrace.toArray()) {
             Statement stmt = (Statement) item;
-            stmt.close();
+            JdbcUtils.close(stmt);
         }
         statementTrace.clear();
 
@@ -251,7 +255,7 @@ public final class DruidConnectionHolder {
         buf.append("{ID:");
         buf.append(System.identityHashCode(conn));
         buf.append(", ConnectTime:\"");
-        buf.append(Utils.toString(new Date(this.connecttimeMillis)));
+        buf.append(Utils.toString(new Date(this.connectTimeMillis)));
 
         buf.append("\", UseCount:");
         buf.append(useCount);

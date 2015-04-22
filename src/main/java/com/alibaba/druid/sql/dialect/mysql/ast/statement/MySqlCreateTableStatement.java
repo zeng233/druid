@@ -31,10 +31,9 @@ import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlObjectImpl;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
+import com.alibaba.druid.util.JdbcConstants;
 
 public class MySqlCreateTableStatement extends SQLCreateTableStatement implements MySqlStatement {
-
-    private boolean                ifNotExiists = false;
 
     private Map<String, SQLObject> tableOptions = new LinkedHashMap<String, SQLObject>();
 
@@ -44,10 +43,12 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
 
     private List<SQLCommentHint>   hints        = new ArrayList<SQLCommentHint>();
 
+    private List<SQLCommentHint>   optionHints  = new ArrayList<SQLCommentHint>();
+
     private SQLExprTableSource     like;
 
     public MySqlCreateTableStatement(){
-
+        super (JdbcConstants.MYSQL);
     }
 
     public SQLExprTableSource getLike() {
@@ -95,14 +96,6 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
 
     public void setQuery(SQLSelect query) {
         this.query = query;
-    }
-
-    public boolean isIfNotExiists() {
-        return ifNotExiists;
-    }
-
-    public void setIfNotExiists(boolean ifNotExiists) {
-        this.ifNotExiists = ifNotExiists;
     }
 
     @Override
@@ -155,5 +148,13 @@ public class MySqlCreateTableStatement extends SQLCreateTableStatement implement
             visitor.endVisit(this);
         }
 
+    }
+
+    public List<SQLCommentHint> getOptionHints() {
+        return optionHints;
+    }
+
+    public void setOptionHints(List<SQLCommentHint> optionHints) {
+        this.optionHints = optionHints;
     }
 }

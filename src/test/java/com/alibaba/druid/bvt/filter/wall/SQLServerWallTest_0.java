@@ -34,15 +34,15 @@ public class SQLServerWallTest_0 extends TestCase {
     private WallProvider initWallProvider() {
         WallProvider provider = new SQLServerWallProvider();
 
-        provider.getConfig().setUseAllow(true);
         provider.getConfig().setStrictSyntaxCheck(false);
         provider.getConfig().setMultiStatementAllow(true);
         provider.getConfig().setConditionAndAlwayTrueAllow(true);
         provider.getConfig().setNoneBaseStatementAllow(true);
-        provider.getConfig().setSelectUnionCheck(false);
-        provider.getConfig().setSchemaCheck(true);
         provider.getConfig().setLimitZeroAllow(true);
+        provider.getConfig().setConditionDoubleConstAllow(true);
+
         provider.getConfig().setCommentAllow(true);
+        provider.getConfig().setSelectUnionCheck(false);
 
         return provider;
     }
@@ -67,15 +67,35 @@ public class SQLServerWallTest_0 extends TestCase {
         }
     }
 
-    public void test_true1() throws Exception {
+    public void test_false2() throws Exception {
         WallProvider provider = initWallProvider();
         {
-            String sql = "SELECT characteristic.columnname + '|' + RTRIM(characteristic.rpid) as rpid , characteristic.columnname, characteristic.chnname FROM characteristic inner join content_sort on characteristic.rpid = content_sort.rpid and content_sort.opid = 2  WHERE (characteristic.columnname IN (SELECT name FROM syscolumns WHERE (id =(SELECT id FROM sysobjects WHERE (name = 'content'))) AND (name NOT IN ('billid', 'itemno', 'tableid', 'rpid')))) AND (characteristic.closed = 0) ORDER BY content_sort.sort, characteristic.code";
-            Assert.assertTrue(provider.checkValid(sql));
+            String sql = "SELECT characteristic.columnname + '|' + RTRIM(characteristic.rpid) as rpid ," //
+                         + " characteristic.columnname, characteristic.chnname " //
+                         + "FROM characteristic" //
+                         + "     inner join content_sort" //
+                         + "         on characteristic.rpid = content_sort.rpid and content_sort.opid = 2"
+                         + "WHERE (characteristic.columnname IN (" //
+                         + "         SELECT name FROM syscolumns" //
+                         + "         WHERE (id =(SELECT id FROM sysobjects WHERE (name = 'content')))" //
+                         + "                 AND (name NOT IN ('billid', 'itemno', 'tableid', 'rpid'))" //
+                         + "         ))" //
+                         + "     AND (characteristic.closed = 0)" //
+                         + "ORDER BY content_sort.sort, characteristic.code";
+            Assert.assertFalse(provider.checkValid(sql));
         }
+    }
+
+    public void test_false3() throws Exception {
+        WallProvider provider = initWallProvider();
+
         {
-            String sql = "SELECT rpid, columnname, chnname, type, textfield, valuefield, ddlbtable, ddlbwhere, ddlbsort, datatype FROM characteristic WHERE (closed = 0) AND ((SELECT COUNT(*) FROM sysobjects WHERE (id IN (SELECT id FROM syscolumns WHERE name = columnname)) AND (name = 'content')) > 0) ORDER BY code";
-            Assert.assertTrue(provider.checkValid(sql));
+            String sql = "SELECT rpid, columnname, chnname, type, textfield" //
+                         + "     , valuefield, ddlbtable, ddlbwhere, ddlbsort, datatype "//
+                         + "FROM characteristic "//
+                         + "WHERE (closed = 0)" //
+                         + "     AND ((SELECT COUNT(*) FROM sysobjects WHERE (id IN (SELECT id FROM syscolumns WHERE name = columnname)) AND (name = 'content')) > 0) ORDER BY code";
+            Assert.assertFalse(provider.checkValid(sql));
         }
     }
 
@@ -98,7 +118,11 @@ public class SQLServerWallTest_0 extends TestCase {
     public void test_true4() throws Exception {
         WallProvider provider = initWallProvider();
         {
-            String sql = "SELECT tableid, chnname FROM r_temptable INNER JOIN  sys_func_pwr ss ON r_temptable.tableid = ss.mainid INNER JOIN  sys_func_pwr sys ON ss.parentid = sys.funcid  WHERE (ismaintable = 1)  and  1=1  and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 550) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 551) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 391) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 552) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 393) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 396) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 4628) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 4836) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 394) AND (functype = 8) AND (Closed = 0))) and ss.funcid <> 4298 and ss.funcid <> 7441 AND (ss.funcid IN  (SELECT DISTINCT funcid FROM sys_func_pwr  WHERE (functype = 8) AND (Closed = 0)  ))  ORDER BY sys.sortflag ,ss.sortflag ";
+            String sql = "SELECT tableid, chnname "//
+                         + "FROM r_temptable "//
+                         + "INNER JOIN  sys_func_pwr ss ON r_temptable.tableid = ss.mainid "//
+                         + "INNER JOIN  sys_func_pwr sys ON ss.parentid = sys.funcid  " //
+                         + "WHERE (ismaintable = 1)  and  1=1  and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 550) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 551) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 391) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 552) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 393) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 396) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 4628) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 4836) AND (functype = 8) AND (Closed = 0))) and (r_temptable.tableid NOT IN (SELECT DISTINCT mainid FROM sys_func_pwr WHERE (parentid = 394) AND (functype = 8) AND (Closed = 0))) and ss.funcid <> 4298 and ss.funcid <> 7441 AND (ss.funcid IN  (SELECT DISTINCT funcid FROM sys_func_pwr  WHERE (functype = 8) AND (Closed = 0)  ))  ORDER BY sys.sortflag ,ss.sortflag ";
             Assert.assertTrue(provider.checkValid(sql));
         }
     }
@@ -107,6 +131,30 @@ public class SQLServerWallTest_0 extends TestCase {
         WallProvider provider = initWallProvider();
         {
             String sql = "SELECT ROW_NUMBER() OVER (ORDER BY a.Account) rowno,  a.Account, a.TrueName, a.UserType, a.RegisterDate, SUM(ISNULL(b.O_PVCreditTotal,0)) pvvalue FROM (                                      SELECT M.Account, Mi.TrueName,M.PVCredits, M.RegisterDate, M.UserType FROM dbo.Members M                                      LEFT JOIN dbo.MembersInfo MI ON M.UID = MI.UID                                      WHERE Spreader='JWJ6789') a LEFT JOIN                                      (                                      SELECT SYS_Order.*, dbo.Members.Account FROM dbo.SYS_Order                                       LEFT JOIN dbo.Members ON dbo.SYS_Order.O_UserID = dbo.Members.UID                                      WHERE O_Status <> 0 AND O_Opratedatetime BETWEEN '2013-7-01' AND '2013-8-01'                                       UNION                                      SELECT SYS_Order_BusinessCenter.*, dbo.Members.Account FROM dbo.SYS_Order_BusinessCenter                                       LEFT JOIN dbo.Members ON dbo.SYS_Order_BusinessCenter.O_UserID = dbo.Members.UID                                      WHERE O_Status <> 0 AND O_Opratedatetime BETWEEN '2013-7-01' AND '2013-8-01'                                       ) b ON a.Account = b.principal GROUP BY a.Account, a.TrueName, a.UserType, a.RegisterDate HAVING a.Account LIKE '%%' OR (a.TrueName LIKE '%%' OR ISNULL(a.TrueName,'') LIKE '%%')";
+            Assert.assertTrue(provider.checkValid(sql));
+        }
+    }
+
+    public void test_true6() throws Exception {
+        WallProvider provider = initWallProvider();
+        {
+            String sql = "select count(1) from [Tiger_Help] where 1 = 1 and id = 1";
+            Assert.assertTrue(provider.checkValid(sql));
+        }
+    }
+
+    public void test_true7() throws Exception {
+        WallProvider provider = initWallProvider();
+        {
+            String sql = "select objjc,objname,pwd,servadd from wfp..wfpsys_user where objname in(select name from master..sysdatabases) ";
+            Assert.assertTrue(provider.checkValid(sql));
+        }
+    }
+
+    public void test_true8() throws Exception {
+        WallProvider provider = initWallProvider();
+        {
+            String sql = "select last_batch,spid=cast(spid as varchar(20)),(SELECT text FROM sys.dm_exec_sql_text(sql_handle)) AS query_text,(SELECT text FROM sys.dm_exec_sql_text(context_info)) AS query_text1,* from master..sysprocesses where dbid=db_id('heecerp') order by master..sysprocesses.last_batch desc";
             Assert.assertTrue(provider.checkValid(sql));
         }
     }
