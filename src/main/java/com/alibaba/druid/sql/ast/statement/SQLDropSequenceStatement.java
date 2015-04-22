@@ -22,14 +22,6 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 public class SQLDropSequenceStatement extends SQLStatementImpl implements SQLDDLStatement {
 
     private SQLName name;
-    
-    public SQLDropSequenceStatement() {
-        
-    }
-    
-    public SQLDropSequenceStatement(String dbType) {
-        super (dbType);
-    }
 
     @Override
     protected void accept0(SQLASTVisitor visitor) {

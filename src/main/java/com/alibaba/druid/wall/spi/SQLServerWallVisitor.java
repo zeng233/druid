@@ -15,6 +15,9 @@
  */
 package com.alibaba.druid.wall.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLObject;
@@ -41,38 +44,26 @@ import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.expr.SQLServerObjectReferenceExpr;
-import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerExecStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerInsertStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitor;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitorAdapter;
-import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.wall.Violation;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallProvider;
 import com.alibaba.druid.wall.WallVisitor;
-import com.alibaba.druid.wall.spi.WallVisitorUtils.WallTopStatementContext;
 import com.alibaba.druid.wall.violation.ErrorCode;
 import com.alibaba.druid.wall.violation.IllegalSQLObjectViolation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements WallVisitor, SQLServerASTVisitor {
 
     private final WallConfig      config;
     private final WallProvider    provider;
-    private final List<Violation> violations      = new ArrayList<Violation>();
-    private boolean               sqlModified     = false;
-    private boolean               sqlEndOfComment = false;
+    private final List<Violation> violations  = new ArrayList<Violation>();
+    private boolean               sqlModified = false;
 
     public SQLServerWallVisitor(WallProvider provider){
         this.config = provider.getConfig();
         this.provider = provider;
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.SQL_SERVER;
     }
 
     @Override
@@ -140,7 +131,8 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
     }
 
     public boolean visit(SQLBinaryOpExpr x) {
-        return WallVisitorUtils.check(this, x);
+        WallVisitorUtils.check(this, x);
+        return true;
     }
 
     @Override
@@ -155,16 +147,14 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
         return true;
     }
 
-    @Override
-    public boolean visit(SQLServerExecStatement x) {
-        return false;
-    }
-
     public boolean visit(SQLExprTableSource x) {
         WallVisitorUtils.check(this, x);
 
-        return !(x.getExpr() instanceof SQLName);
+        if (x.getExpr() instanceof SQLName) {
+            return false;
+        }
 
+        return true;
     }
 
     public boolean visit(SQLSelectGroupByClause x) {
@@ -253,14 +243,8 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
 
         if (config.isVariantCheck() && varName.startsWith("@@")) {
 
-            final WallTopStatementContext topStatementContext = WallVisitorUtils.getWallTopStatementContext();
-            if (topStatementContext != null
-                && (topStatementContext.fromSysSchema() || topStatementContext.fromSysTable())) {
-                return false;
-            }
-
             boolean allow = true;
-            if (isDeny(varName) && (WallVisitorUtils.isWhereOrHaving(x) || WallVisitorUtils.checkSqlExpr(x))) {
+            if (WallVisitorUtils.isWhereOrHaving(x) && isDeny(varName)) {
                 allow = false;
             }
 
@@ -283,7 +267,17 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
 
     @Override
     public boolean visit(SQLServerObjectReferenceExpr x) {
-        return false;
+        if (x.getSchema() != null && !provider.checkDenySchema(x.getSchema())) {
+            this.getViolations().add(new IllegalSQLObjectViolation(ErrorCode.SCHEMA_DENY, "schema not allow : "
+                                                                                          + x.getSchema(),
+                                                                   this.toSQL(x)));
+        }
+        if (x.getDatabase() != null && !provider.checkDenySchema(x.getDatabase())) {
+            this.getViolations().add(new IllegalSQLObjectViolation(ErrorCode.SCHEMA_DENY, "schema not allow : "
+                                                                                          + x.getDatabase(),
+                                                                   this.toSQL(x)));
+        }
+        return true;
     }
 
     @Override
@@ -305,7 +299,7 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
     @Override
     public boolean visit(SQLCreateTableStatement x) {
         WallVisitorUtils.check(this, x);
-        return false;
+        return true;
     }
 
     @Override
@@ -333,15 +327,5 @@ public class SQLServerWallVisitor extends SQLServerASTVisitorAdapter implements 
     @Override
     public boolean visit(SQLCreateTriggerStatement x) {
         return false;
-    }
-    
-    @Override
-    public boolean isSqlEndOfComment() {
-        return this.sqlEndOfComment;
-    }
-
-    @Override
-    public void setSqlEndOfComment(boolean sqlEndOfComment) {
-        this.sqlEndOfComment = sqlEndOfComment;
     }
 }

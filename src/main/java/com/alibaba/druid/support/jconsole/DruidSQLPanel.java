@@ -15,11 +15,12 @@
  */
 package com.alibaba.druid.support.jconsole;
 
-import com.alibaba.druid.support.jconsole.model.ColumnGroup;
-import com.alibaba.druid.support.jconsole.model.DruidTableModel;
-import com.alibaba.druid.support.jconsole.model.GroupableTableHeader;
-import com.alibaba.druid.support.jconsole.model.GroupableTableHeaderUI;
-import com.alibaba.druid.support.jconsole.model.RowHeaderTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -28,12 +29,12 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
+
+import com.alibaba.druid.support.jconsole.model.ColumnGroup;
+import com.alibaba.druid.support.jconsole.model.DruidTableModel;
+import com.alibaba.druid.support.jconsole.model.GroupableTableHeader;
+import com.alibaba.druid.support.jconsole.model.GroupableTableHeaderUI;
+import com.alibaba.druid.support.jconsole.model.RowHeaderTable;
 
 /**
  * 请求地址 /sql.json
@@ -129,7 +130,7 @@ public class DruidSQLPanel extends DruidPanel {
                                                                                   add("FetchRowCountHistogram");
                                                                               }
                                                                           };
-    private static final String            HISTOGRAM                      = "Histogram";
+    private static final String            HISOGRAM                       = "Histogram";
     private static final String            Effected_RowCount_HISOGRAM     = "EffectedRowCountHistogram";
     private static final String            ExecuteAndResult_Hold_HISOGRAM = "ExecuteAndResultHoldTimeHistogram";
     private static final String            FetchRowCount_HISOGRAM         = "FetchRowCountHistogram";
@@ -137,7 +138,7 @@ public class DruidSQLPanel extends DruidPanel {
 
                                                                               private static final long serialVersionUID = 1L;
                                                                               {
-                                                                                  add(HISTOGRAM);
+                                                                                  add(HISOGRAM);
                                                                                   add(Effected_RowCount_HISOGRAM);
                                                                                   add(ExecuteAndResult_Hold_HISOGRAM);
                                                                                   add(FetchRowCount_HISOGRAM);
@@ -163,7 +164,7 @@ public class DruidSQLPanel extends DruidPanel {
 
     private void addGroupData(String keyNow, int index) {
         // System.out.println("keyNow:"+keyNow+"index:"+index);
-        if (HISTOGRAM.equals(keyNow)) {
+        if (HISOGRAM.equals(keyNow)) {
             listHistogram.add(index);
         } else if (Effected_RowCount_HISOGRAM.equals(keyNow)) {
             listEffectedRowCountHistogram.add(index);
@@ -181,7 +182,7 @@ public class DruidSQLPanel extends DruidPanel {
      * @return 最终的处理结果
      */
     private ArrayList<LinkedHashMap<String, Object>> preProcess(ArrayList<LinkedHashMap<String, Object>> data) {
-        groupHistogram = new ColumnGroup(HISTOGRAM);
+        groupHistogram = new ColumnGroup(HISOGRAM);
         groupEffectedRowCountHistogram = new ColumnGroup(Effected_RowCount_HISOGRAM);
         groupExecuteAndResultHoldTimeHistogram = new ColumnGroup(ExecuteAndResult_Hold_HISOGRAM);
         groupFetchRowCountHistogram = new ColumnGroup(FetchRowCount_HISOGRAM);
@@ -236,6 +237,8 @@ public class DruidSQLPanel extends DruidPanel {
                             }
                         }
                     }
+                } else {
+
                 }
 
             }// end of foreach ARRAY_DATA_MAP

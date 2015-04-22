@@ -149,7 +149,7 @@ public class IPAddress implements Cloneable {
      * @return Return the string representation of the IP address.
      */
     public String toString() {
-        StringBuilder result = new StringBuilder();
+        StringBuffer result = new StringBuffer();
         int temp;
 
         temp = ipAddress & 0x000000FF;
@@ -275,6 +275,9 @@ public class IPAddress implements Cloneable {
     }
 
     public boolean equals(Object another) {
-        return another instanceof IPAddress && ipAddress == ((IPAddress) another).ipAddress;
+        if (another instanceof IPAddress) {
+            return ipAddress == ((IPAddress) another).ipAddress;
+        }
+        return false;
     }
 }

@@ -8,5 +8,5 @@ session_user
 benchmark
 current_user
 sleep
-xmltype
-receive_message
+extractvalue
+updatexml

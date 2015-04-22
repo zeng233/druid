@@ -15,8 +15,11 @@
  */
 package com.alibaba.druid.sql.ast.statement;
 
-import com.alibaba.druid.sql.ast.SQLObject;
+import com.alibaba.druid.sql.ast.SQLObjectImpl;
 
-public interface SQLSelectQuery extends SQLObject {
+public abstract class SQLSelectQuery extends SQLObjectImpl {
 
+    public SQLSelectQuery(){
+
+    }
 }

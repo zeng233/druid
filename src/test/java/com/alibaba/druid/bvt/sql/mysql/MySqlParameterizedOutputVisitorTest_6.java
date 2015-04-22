@@ -26,13 +26,11 @@ public class MySqlParameterizedOutputVisitorTest_6 extends TestCase {
 
     public void test_0() throws Exception {
         String sql = "SET autocommit=1";
-        String paramSql = "SET @@autocommit = ?";
-        Assert.assertEquals(ParameterizedOutputVisitorUtils.parameterize(sql, JdbcConstants.MYSQL), paramSql);
+        Assert.assertSame(ParameterizedOutputVisitorUtils.parameterize(sql, JdbcConstants.MYSQL), sql);
     }
-
+    
     public void test_1() throws Exception {
         String sql = "SET GLOBAL sort_buffer_size=1000000, SESSION sort_buffer_size=1000000;";
-        String paramSql = "SET @@global.sort_buffer_size = ?, @@sort_buffer_size = ?";
-        Assert.assertEquals(ParameterizedOutputVisitorUtils.parameterize(sql, JdbcConstants.MYSQL), paramSql);
+        Assert.assertSame(ParameterizedOutputVisitorUtils.parameterize(sql, JdbcConstants.MYSQL), sql);
     }
 }

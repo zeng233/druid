@@ -37,7 +37,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.alibaba.druid.proxy.jdbc.JdbcParameter.TYPE;
@@ -51,7 +50,6 @@ public class PreparedStatementProxyImpl extends StatementProxyImpl implements Pr
     protected final String            sql;
     private JdbcParameter[]           parameters     = new JdbcParameter[16];
     private int                       parametersSize = 0;
-    private Map<Integer, JdbcParameter> paramMap       = null;
 
     public PreparedStatementProxyImpl(ConnectionProxy connection, PreparedStatement statement, String sql, long id){
         super(connection, statement, id);
@@ -60,14 +58,7 @@ public class PreparedStatementProxyImpl extends StatementProxyImpl implements Pr
     }
 
     public Map<Integer, JdbcParameter> getParameters() {
-        if (paramMap == null) {
-            paramMap = new HashMap<Integer, JdbcParameter>(parametersSize);
-            for (int i = 0; i < parametersSize; ++i) {
-                paramMap.put(i, parameters[i]);
-            }
-        }
-  
-        return paramMap;
+        return null;
     }
 
     void setParameter(int jdbcIndex, JdbcParameter parameter) {
@@ -80,10 +71,6 @@ public class PreparedStatementProxyImpl extends StatementProxyImpl implements Pr
             parameters = Arrays.copyOf(parameters, parametersSize + 16);
         }
         parameters[index] = parameter;
-        
-        if (paramMap != null) {
-            paramMap = null;
-        }
     }
 
     public int getParametersSize() {

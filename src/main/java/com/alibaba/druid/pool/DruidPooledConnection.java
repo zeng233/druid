@@ -217,14 +217,7 @@ public class DruidPooledConnection extends PoolableWrapper implements javax.sql.
             return;
         }
 
-        DruidAbstractDataSource dataSource = holder.getDataSource();
-        boolean isSameThread = this.getOwnerThread() == Thread.currentThread();
-        
-        if (!isSameThread) {
-            dataSource.setAsyncCloseConnectionEnable(true);
-        }
-        
-        if (dataSource.isAsyncCloseConnectionEnable()) {
+        if (holder.getDataSource().isRemoveAbandoned()) {
             syncClose();
             return;
         }
@@ -233,7 +226,7 @@ public class DruidPooledConnection extends PoolableWrapper implements javax.sql.
             listener.connectionClosed(new ConnectionEvent(this));
         }
 
-        
+        DruidAbstractDataSource dataSource = holder.getDataSource();
         List<Filter> filters = dataSource.getProxyFilters();
         if (filters.size() > 0) {
             FilterChainImpl filterChain = new FilterChainImpl(dataSource);
@@ -1085,23 +1078,6 @@ public class DruidPooledConnection extends PoolableWrapper implements javax.sql.
     }
 
     public void checkState() throws SQLException {
-        final boolean asyncCloseEnabled;
-        if (holder != null) {
-            asyncCloseEnabled = holder.getDataSource().isAsyncCloseConnectionEnable();
-        } else {
-            asyncCloseEnabled = false;
-        }
-        
-        if (asyncCloseEnabled) {
-            synchronized (this) {
-                checkStateInternal();
-            }
-        } else {
-            checkStateInternal();
-        }
-    }
-    
-    private void checkStateInternal() throws SQLException {
         if (holder == null) {
             if (disableError != null) {
                 throw new SQLException("connection holder is null", disableError);

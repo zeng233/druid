@@ -17,7 +17,6 @@ package com.alibaba.druid.sql.ast.expr;
 
 import java.io.Serializable;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLExprImpl;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
@@ -28,25 +27,16 @@ public class SQLBinaryOpExpr extends SQLExprImpl implements Serializable {
     private SQLExpr           left;
     private SQLExpr           right;
     private SQLBinaryOperator operator;
-    private String            dbType;
 
     public SQLBinaryOpExpr(){
 
     }
 
-    public SQLBinaryOpExpr(String dbType){
-        this.dbType = dbType;
-    }
-
     public SQLBinaryOpExpr(SQLExpr left, SQLBinaryOperator operator, SQLExpr right){
-        this(left, operator, right, null);
-    }
-    
-    public SQLBinaryOpExpr(SQLExpr left, SQLBinaryOperator operator, SQLExpr right, String dbType){
+
         setLeft(left);
         setRight(right);
         this.operator = operator;
-        this.dbType = dbType;
     }
 
     public SQLBinaryOpExpr(SQLExpr left, SQLExpr right, SQLBinaryOperator operator){
@@ -54,14 +44,6 @@ public class SQLBinaryOpExpr extends SQLExprImpl implements Serializable {
         setLeft(left);
         setRight(right);
         this.operator = operator;
-    }
-
-    public String getDbType() {
-        return dbType;
-    }
-
-    public void setDbType(String dbType) {
-        this.dbType = dbType;
     }
 
     public SQLExpr getLeft() {
@@ -145,7 +127,4 @@ public class SQLBinaryOpExpr extends SQLExprImpl implements Serializable {
         return true;
     }
 
-    public String toString() {
-        return SQLUtils.toSQLString(this, getDbType());
-    }
 }

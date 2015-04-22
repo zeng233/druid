@@ -24,8 +24,15 @@ public class WrapperAdapter implements Wrapper {
 
     @Override
     public boolean isWrapperFor(Class<?> iface) {
-        return iface != null && iface.isInstance(this);
+        if (iface == null) {
+            return false;
+        }
 
+        if (iface.isInstance(this)) {
+            return true;
+        }
+
+        return false;
     }
 
     @SuppressWarnings("unchecked")

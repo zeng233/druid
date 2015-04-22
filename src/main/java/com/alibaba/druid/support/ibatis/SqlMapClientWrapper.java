@@ -15,6 +15,11 @@
  */
 package com.alibaba.druid.support.ibatis;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapSession;
 import com.ibatis.sqlmap.engine.execution.SqlExecutor;
@@ -22,10 +27,6 @@ import com.ibatis.sqlmap.engine.impl.ExtendedSqlMapClient;
 import com.ibatis.sqlmap.engine.impl.SqlMapExecutorDelegate;
 import com.ibatis.sqlmap.engine.mapping.result.ResultObjectFactory;
 import com.ibatis.sqlmap.engine.mapping.statement.MappedStatement;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 @SuppressWarnings("deprecation")
 public class SqlMapClientWrapper extends SqlMapExecutorWrapper implements SqlMapClient, ExtendedSqlMapClient {
@@ -58,8 +59,8 @@ public class SqlMapClientWrapper extends SqlMapExecutorWrapper implements SqlMap
         client.endTransaction();
     }
 
-    public void setUserConnection(Connection connection) throws SQLException {
-        client.setUserConnection(connection);
+    public void setUserConnection(Connection connnection) throws SQLException {
+        client.setUserConnection(connnection);
     }
 
     public Connection getUserConnection() throws SQLException {

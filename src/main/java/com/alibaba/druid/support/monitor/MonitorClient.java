@@ -15,6 +15,23 @@
  */
 package com.alibaba.druid.support.monitor;
 
+import static com.alibaba.druid.util.Utils.getBoolean;
+import static com.alibaba.druid.util.Utils.getInteger;
+
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidDataSourceStatValue;
 import com.alibaba.druid.stat.DruidDataSourceStatManager;
@@ -33,23 +50,6 @@ import com.alibaba.druid.util.StringUtils;
 import com.alibaba.druid.util.Utils;
 import com.alibaba.druid.wall.WallProviderStatValue;
 
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static com.alibaba.druid.util.Utils.getBoolean;
-import static com.alibaba.druid.util.Utils.getInteger;
-
 public class MonitorClient {
 
     private final static Log         LOG                          = LogFactory.getLog(MonitorClient.class);
@@ -59,15 +59,15 @@ public class MonitorClient {
     private ScheduledExecutorService scheduler;
     private int                      schedulerThreadSize          = 1;
 
-    private long                     timeBetweenSqlCollect        = DEFAULT_TIME_BETWEEN_COLLECT;
-    private long                     timeBetweenSpringCollect     = DEFAULT_TIME_BETWEEN_COLLECT;
-    private long                     timeBetweenWebUriCollect     = DEFAULT_TIME_BETWEEN_COLLECT;
+    private long                     timeBeetweenSqlCollect       = DEFAULT_TIME_BETWEEN_COLLECT;
+    private long                     timeBeetweenSpringCollect    = DEFAULT_TIME_BETWEEN_COLLECT;
+    private long                     timeBeetweenWebUriCollect    = DEFAULT_TIME_BETWEEN_COLLECT;
     private TimeUnit                 timeUnit                     = TimeUnit.SECONDS;
 
     private boolean                  collectSqlEnable             = true;
     private boolean                  collectSqlWallEnable         = true;
-    private boolean                  collectSpringMethodEnable    = true;
-    private boolean                  collectWebAppEnable          = true;
+    private boolean                  collectSpringMethodEanble    = true;
+    private boolean                  collectWebAppEanble          = true;
     private boolean                  collectWebURIEnable          = true;
 
     private MonitorDao               dao;
@@ -88,10 +88,10 @@ public class MonitorClient {
         host = items[1];
         ip = getLocalIPAddress().getHostAddress();
 
-        configFromProperty(System.getProperties());
+        configFromPropety(System.getProperties());
     }
 
-    public void configFromProperty(Properties properties) {
+    public void configFromPropety(Properties properties) {
         {
             Integer value = getInteger(properties, "druid.monitor.client.schedulerThreadSize");
             if (value != null) {
@@ -100,21 +100,21 @@ public class MonitorClient {
         }
 
         {
-            Integer value = getInteger(properties, "druid.monitor.client.timeBetweenSqlCollect");
+            Integer value = getInteger(properties, "druid.monitor.client.timeBeetweenSqlCollect");
             if (value != null) {
-                this.setTimeBetweenSqlCollect(value);
+                this.setTimeBeetweenSqlCollect(value);
             }
         }
         {
-            Integer value = getInteger(properties, "druid.monitor.client.timeBetweenSpringCollect");
+            Integer value = getInteger(properties, "druid.monitor.client.timeBeetweenSpringCollect");
             if (value != null) {
-                this.setTimeBetweenSpringCollect(value);
+                this.setTimeBeetweenSpringCollect(value);
             }
         }
         {
-            Integer value = getInteger(properties, "druid.monitor.client.timeBetweenWebUriCollect");
+            Integer value = getInteger(properties, "druid.monitor.client.timeBeetweenWebUriCollect");
             if (value != null) {
-                this.setTimeBetweenWebUriCollect(value);
+                this.setTimeBeetweenWebUriCollect(value);
             }
         }
 
@@ -133,16 +133,16 @@ public class MonitorClient {
         }
 
         {
-            Boolean value = getBoolean(properties, "druid.monitor.client.collectSpringMethodEnable");
+            Boolean value = getBoolean(properties, "druid.monitor.client.collectSpringMethodEanble");
             if (value != null) {
-                this.setCollectSpringMethodEnable(value);
+                this.setCollectSpringMethodEanble(value);
             }
         }
 
         {
-            Boolean value = getBoolean(properties, "druid.monitor.client.collectWebAppEnable");
+            Boolean value = getBoolean(properties, "druid.monitor.client.collectWebAppEanble");
             if (value != null) {
-                this.setCollectWebAppEnable(value);
+                this.setCollectWebAppEanble(value);
             }
         }
 
@@ -191,7 +191,7 @@ public class MonitorClient {
             public void run() {
                 collectSql();
             }
-        }, timeBetweenSqlCollect, timeBetweenSqlCollect, timeUnit);
+        }, timeBeetweenSqlCollect, timeBeetweenSqlCollect, timeUnit);
 
         scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -199,7 +199,7 @@ public class MonitorClient {
             public void run() {
                 collectSpringMethod();
             }
-        }, timeBetweenSpringCollect, timeBetweenSpringCollect, timeUnit);
+        }, timeBeetweenSpringCollect, timeBeetweenSpringCollect, timeUnit);
 
         scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -207,7 +207,7 @@ public class MonitorClient {
             public void run() {
                 collectWebURI();
             }
-        }, timeBetweenWebUriCollect, timeBetweenWebUriCollect, timeUnit);
+        }, timeBeetweenWebUriCollect, timeBeetweenWebUriCollect, timeUnit);
     }
 
     public ScheduledExecutorService getScheduler() {
@@ -287,7 +287,7 @@ public class MonitorClient {
     }
 
     private void collectSpringMethod() {
-        if (!collectSpringMethodEnable) {
+        if (!collectSpringMethodEanble) {
             return;
         }
 
@@ -311,7 +311,7 @@ public class MonitorClient {
     }
 
     private void collectWebURI() {
-        if ((!collectWebAppEnable) && !collectWebURIEnable) {
+        if ((!collectWebAppEanble) && !collectWebURIEnable) {
             return;
         }
 
@@ -327,7 +327,7 @@ public class MonitorClient {
 
             WebAppStat webAppStat = (WebAppStat) item;
 
-            if (collectWebAppEnable) {
+            if (collectWebAppEanble) {
                 WebAppStatValue webAppStatValue = webAppStat.getStatValue(true);
                 webAppStatValueList.add(webAppStatValue);
             }
@@ -360,28 +360,28 @@ public class MonitorClient {
         this.dao = dao;
     }
 
-    public long getTimeBetweenSqlCollect() {
-        return timeBetweenSqlCollect;
+    public long getTimeBeetweenSqlCollect() {
+        return timeBeetweenSqlCollect;
     }
 
-    public void setTimeBetweenSqlCollect(long timeBetweenSqlCollect) {
-        this.timeBetweenSqlCollect = timeBetweenSqlCollect;
+    public void setTimeBeetweenSqlCollect(long timeBeetweenSqlCollect) {
+        this.timeBeetweenSqlCollect = timeBeetweenSqlCollect;
     }
 
-    public long getTimeBetweenSpringCollect() {
-        return timeBetweenSpringCollect;
+    public long getTimeBeetweenSpringCollect() {
+        return timeBeetweenSpringCollect;
     }
 
-    public void setTimeBetweenSpringCollect(long timeBetweenSpringCollect) {
-        this.timeBetweenSpringCollect = timeBetweenSpringCollect;
+    public void setTimeBeetweenSpringCollect(long timeBeetweenSpringCollect) {
+        this.timeBeetweenSpringCollect = timeBeetweenSpringCollect;
     }
 
-    public long getTimeBetweenWebUriCollect() {
-        return timeBetweenWebUriCollect;
+    public long getTimeBeetweenWebUriCollect() {
+        return timeBeetweenWebUriCollect;
     }
 
-    public void setTimeBetweenWebUriCollect(long timeBetweenWebUriCollect) {
-        this.timeBetweenWebUriCollect = timeBetweenWebUriCollect;
+    public void setTimeBeetweenWebUriCollect(long timeBeetweenWebUriCollect) {
+        this.timeBeetweenWebUriCollect = timeBeetweenWebUriCollect;
     }
 
     public TimeUnit getTimeUnit() {
@@ -408,20 +408,20 @@ public class MonitorClient {
         this.collectSqlWallEnable = collectSqlWallEnable;
     }
 
-    public boolean isCollectSpringMethodEnable() {
-        return collectSpringMethodEnable;
+    public boolean isCollectSpringMethodEanble() {
+        return collectSpringMethodEanble;
     }
 
-    public void setCollectSpringMethodEnable(boolean collectSpringMethodEnable) {
-        this.collectSpringMethodEnable = collectSpringMethodEnable;
+    public void setCollectSpringMethodEanble(boolean collectSpringMethodEanble) {
+        this.collectSpringMethodEanble = collectSpringMethodEanble;
     }
 
-    public boolean isCollectWebAppEnable() {
-        return collectWebAppEnable;
+    public boolean isCollectWebAppEanble() {
+        return collectWebAppEanble;
     }
 
-    public void setCollectWebAppEnable(boolean collectWebAppEnable) {
-        this.collectWebAppEnable = collectWebAppEnable;
+    public void setCollectWebAppEanble(boolean collectWebAppEanble) {
+        this.collectWebAppEanble = collectWebAppEanble;
     }
 
     public boolean isCollectWebURIEnable() {
@@ -483,14 +483,15 @@ public class MonitorClient {
     public static InetAddress getLocalIPAddress() {
         try {
             Enumeration<?> netInterfaces = NetworkInterface.getNetworkInterfaces();
-            InetAddress inetAddress = null;
-            while (netInterfaces.hasMoreElements()) {
+            InetAddress inetAddr = null;
+            boolean flag = true;
+            while (netInterfaces.hasMoreElements() && flag) {
                 NetworkInterface ni = (NetworkInterface) netInterfaces.nextElement();
                 Enumeration<?> e2 = ni.getInetAddresses();
                 while (e2.hasMoreElements()) {
-                    inetAddress = (InetAddress) e2.nextElement();
-                    if (!inetAddress.isLoopbackAddress() && !inetAddress.getHostAddress().contains(":")) {
-                        return inetAddress;
+                    inetAddr = (InetAddress) e2.nextElement();
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.getHostAddress().indexOf(":") == -1) {
+                        return inetAddr;
                     }
                 }
             }

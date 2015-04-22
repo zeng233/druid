@@ -27,11 +27,11 @@ public class WallContext {
     private Map<String, WallSqlFunctionStat>      functionStats;
     private final String                          dbType;
     private int                                   commentCount;
-    private int                                   warnings                     = 0;
-    private int                                   unionWarnings                = 0;
-    private int                                   updateNoneConditionWarnings  = 0;
-    private int                                   deleteNoneConditionWarnings  = 0;
-    private int                                   likeNumberWarnings           = 0;
+    private int                                   warnnings                    = 0;
+    private int                                   unionWarnnings               = 0;
+    private int                                   updateNoneConditionWarnnings = 0;
+    private int                                   deleteNoneConditionWarnnings = 0;
+    private int                                   likeNumberWarnnings          = 0;
 
     public WallContext(String dbType){
         this.dbType = dbType;
@@ -129,61 +129,61 @@ public class WallContext {
 
     public void incrementCommentCount() {
         if (this.commentCount == 0) {
-            this.warnings++;
+            this.warnnings++;
         }
         this.commentCount++;
     }
 
-    public int getWarnings() {
-        return warnings;
+    public int getWarnnings() {
+        return warnnings;
     }
 
-    public void incrementWarnings() {
-        this.warnings++;
+    public void incrementWarnnings() {
+        this.warnnings++;
     }
 
-    public int getLikeNumberWarnings() {
-        return likeNumberWarnings;
+    public int getLikeNumberWarnnings() {
+        return likeNumberWarnnings;
     }
 
-    public void incrementLikeNumberWarnings() {
-        if (likeNumberWarnings == 0) {
-            this.warnings++;
+    public void incrementLikeNumberWarnnings() {
+        if (likeNumberWarnnings == 0) {
+            this.warnnings++;
         }
-        likeNumberWarnings++;
+        likeNumberWarnnings++;
     }
 
-    public int getUnionWarnings() {
-        return unionWarnings;
+    public int getUnionWarnnings() {
+        return unionWarnnings;
     }
 
-    public void incrementUnionWarnings() {
-        if (this.unionWarnings == 0) {
-            this.incrementWarnings();
+    public void incrementUnionWarnnings() {
+        if (this.unionWarnnings == 0) {
+            this.incrementWarnnings();
         }
-        this.unionWarnings++;
+        this.unionWarnnings++;
     }
 
-    public int getUpdateNoneConditionWarnings() {
-        return updateNoneConditionWarnings;
+    public int getUpdateNoneConditionWarnnings() {
+        return updateNoneConditionWarnnings;
     }
 
-    public void incrementUpdateNoneConditionWarnings() {
-        // if (this.updateNoneConditionWarnings == 0) {
-        // this.incrementWarnings();
-        // }
-        this.updateNoneConditionWarnings++;
+    public void incrementUpdateNoneConditionWarnnings() {
+        if (this.updateNoneConditionWarnnings == 0) {
+            this.incrementWarnnings();
+        }
+        this.updateNoneConditionWarnnings++;
     }
 
-    public int getDeleteNoneConditionWarnings() {
-        return deleteNoneConditionWarnings;
+    public int getDeleteNoneConditionWarnnings() {
+        return deleteNoneConditionWarnnings;
     }
 
-    public void incrementDeleteNoneConditionWarnings() {
-        // if (this.deleteNoneConditionWarnings == 0) {
-        // this.incrementWarnings();
-        // }
-        this.deleteNoneConditionWarnings++;
+    public void incrementDeleteNoneConditionWarnnings() {
+        if (this.deleteNoneConditionWarnnings == 0) {
+            this.incrementWarnnings();
+        }
+        this.deleteNoneConditionWarnnings++;
     }
 
 }

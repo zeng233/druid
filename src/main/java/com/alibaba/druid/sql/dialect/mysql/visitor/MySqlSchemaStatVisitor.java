@@ -27,7 +27,6 @@ import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlForceIndexHint;
@@ -36,13 +35,13 @@ import com.alibaba.druid.sql.dialect.mysql.ast.MySqlKey;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlPrimaryKey;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlUnique;
 import com.alibaba.druid.sql.dialect.mysql.ast.MySqlUseIndexHint;
-import com.alibaba.druid.sql.dialect.mysql.ast.MysqlForeignKey;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBinaryExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBooleanExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlExtractExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlIntervalExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlMatchAgainstExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOutFileExpr;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlSelectGroupByExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlUserName;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.CobarShowStatus;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlAlterTableAddColumn;
@@ -56,7 +55,6 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlAlterTableStatemen
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlAlterUserStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlAnalyzeStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlBinlogStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlBlockStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCommitStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateIndexStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
@@ -67,7 +65,6 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDescribeStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlExecuteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHelpStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHintStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlKillStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlLoadDataInFileStatement;
@@ -92,7 +89,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.L
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetCharSetStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetNamesStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetPasswordStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetTransactionStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSetTransactionIsolationLevelStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowAuthorsStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowBinLogEventsStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlShowBinaryLogsStatement;
@@ -227,6 +224,17 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
     }
 
     @Override
+    public boolean visit(MySqlBooleanExpr x) {
+
+        return true;
+    }
+
+    @Override
+    public void endVisit(MySqlBooleanExpr x) {
+
+    }
+
+    @Override
     public boolean visit(Limit x) {
 
         return true;
@@ -240,7 +248,7 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
     @Override
     public boolean visit(MySqlTableIndex x) {
 
-        return false;
+        return true;
     }
 
     @Override
@@ -300,6 +308,17 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
 
     @Override
     public boolean visit(MySqlMatchAgainstExpr x) {
+
+        return true;
+    }
+
+    @Override
+    public void endVisit(MySqlBinaryExpr x) {
+
+    }
+
+    @Override
+    public boolean visit(MySqlBinaryExpr x) {
 
         return true;
     }
@@ -566,12 +585,12 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
     }
 
     @Override
-    public boolean visit(MySqlSetTransactionStatement x) {
+    public boolean visit(MySqlSetTransactionIsolationLevelStatement x) {
         return false;
     }
 
     @Override
-    public void endVisit(MySqlSetTransactionStatement x) {
+    public void endVisit(MySqlSetTransactionIsolationLevelStatement x) {
 
     }
 
@@ -1147,15 +1166,7 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
 
     @Override
     public boolean visit(MySqlCreateTableStatement x) {
-        boolean val = super.visit((SQLCreateTableStatement) x);
-
-        for (SQLObject option : x.getTableOptions().values()) {
-            if (option instanceof SQLTableSource) {
-                option.accept(this);
-            }
-        }
-
-        return val;
+        return super.visit((SQLCreateTableStatement) x);
     }
 
     @Override
@@ -1190,16 +1201,6 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
 
     @Override
     public void endVisit(MySqlUnique x) {
-
-    }
-
-    @Override
-    public boolean visit(MysqlForeignKey x) {
-        return super.visit(x);
-    }
-
-    @Override
-    public void endVisit(MysqlForeignKey x) {
 
     }
 
@@ -1322,44 +1323,14 @@ public class MySqlSchemaStatVisitor extends SchemaStatVisitor implements MySqlAS
     public void endVisit(MySqlOptimizeStatement x) {
 
     }
-
+    
     @Override
     public boolean visit(MySqlSetPasswordStatement x) {
         return false;
     }
-
+    
     @Override
     public void endVisit(MySqlSetPasswordStatement x) {
-
-    }
-
-    @Override
-    public boolean visit(MySqlHintStatement x) {
-        return true;
-    }
-
-    @Override
-    public void endVisit(MySqlHintStatement x) {
-
-    }
-
-    @Override
-    public boolean visit(MySqlSelectGroupByExpr x) {
-        return true;
-    }
-
-    @Override
-    public void endVisit(MySqlSelectGroupByExpr x) {
-        
-    }
-
-    @Override
-    public boolean visit(MySqlBlockStatement x) {
-        return true;
-    }
-
-    @Override
-    public void endVisit(MySqlBlockStatement x) {
         
     }
 

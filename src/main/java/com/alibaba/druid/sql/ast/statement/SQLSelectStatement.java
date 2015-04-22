@@ -26,16 +26,7 @@ public class SQLSelectStatement extends SQLStatementImpl {
 
     }
 
-    public SQLSelectStatement(String dbType){
-        super (dbType);
-    }
-
     public SQLSelectStatement(SQLSelect select){
-        this.setSelect(select);
-    }
-
-    public SQLSelectStatement(SQLSelect select, String dbType){
-        this(dbType);
         this.setSelect(select);
     }
 

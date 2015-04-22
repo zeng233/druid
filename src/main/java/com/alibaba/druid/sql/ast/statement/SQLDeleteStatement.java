@@ -29,10 +29,6 @@ public class SQLDeleteStatement extends SQLStatementImpl {
     public SQLDeleteStatement(){
 
     }
-    
-    public SQLDeleteStatement(String dbType){
-        super (dbType);
-    }
 
     public SQLTableSource getTableSource() {
         return tableSource;

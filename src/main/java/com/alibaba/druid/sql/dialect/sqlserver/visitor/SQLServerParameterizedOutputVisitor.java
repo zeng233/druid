@@ -17,13 +17,10 @@ package com.alibaba.druid.sql.dialect.sqlserver.visitor;
 
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLHexExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumberExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.visitor.ParameterizedOutputVisitorUtils;
 import com.alibaba.druid.sql.visitor.ParameterizedVisitor;
 
@@ -84,29 +81,4 @@ public class SQLServerParameterizedOutputVisitor extends SQLServerOutputVisitor 
 
         return ParameterizedOutputVisitorUtils.visit(this, x);
     }
-
-    public boolean visit(SQLNullExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
-            return super.visit(x);
-        }
-
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-    
-    public boolean visit(SQLVariantRefExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x) || x.getName().equalsIgnoreCase("?")) {
-            return super.visit(x);
-        }
-        
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-    
-    public boolean visit(SQLHexExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
-            return super.visit(x);
-        }
-
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-
 }

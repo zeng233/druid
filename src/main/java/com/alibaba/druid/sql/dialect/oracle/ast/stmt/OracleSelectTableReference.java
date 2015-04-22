@@ -15,7 +15,6 @@
  */
 package com.alibaba.druid.sql.dialect.oracle.ast.stmt;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.FlashbackQueryClause;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.PartitionExtensionClause;
@@ -109,9 +108,5 @@ public class OracleSelectTableReference extends SQLExprTableSource implements Or
         if ((this.alias != null) && (this.alias.length() != 0)) {
             buf.append(this.alias);
         }
-    }
-    
-    public String toString () {
-        return SQLUtils.toOracleString(this);
     }
 }

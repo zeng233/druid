@@ -230,7 +230,6 @@ public class OracleLexer extends Lexer {
             } else {
                 stringVal = subString(mark, bufPos);
                 token = Token.MULTI_LINE_COMMENT;
-                hasComment = true;
             }
 
             if (token != Token.HINT && !isAllowComment()) {
@@ -273,8 +272,6 @@ public class OracleLexer extends Lexer {
 
             stringVal = subString(mark + 1, bufPos);
             token = Token.LINE_COMMENT;
-            hasComment = true;
-            endOfComment = isEOF();
             return;
         }
     }

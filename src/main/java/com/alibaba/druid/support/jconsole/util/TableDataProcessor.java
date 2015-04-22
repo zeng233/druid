@@ -15,17 +15,18 @@
  */
 package com.alibaba.druid.support.jconsole.util;
 
-import com.alibaba.druid.stat.DruidStatService;
-import com.alibaba.druid.support.json.JSONUtils;
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
-
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+
+import com.alibaba.druid.stat.DruidStatService;
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
 
 /**
  * 表格数据处理类
@@ -59,17 +60,17 @@ public final class TableDataProcessor {
      * 将行数据转化为列数据 由于json中的数据是按照一条条的记录返回的，
      * 而在显示的时候需要按照“名称”、“值”两列显示，所以要做转化。
      * 
-     * @param rowData 原始数据
+     * @param rowDatas 原始数据
      * @param keyword 关键字,可以为null
      * @return 生成的列数据的对象
      */
-    public static ColumnData row2col(ArrayList<LinkedHashMap<String, Object>> rowData, String keyword) {
-        ColumnData data = new ColumnData();
-        ArrayList<LinkedHashMap<String, Object>> colData = new ArrayList<LinkedHashMap<String, Object>>();
+    public static ColumnData row2col(ArrayList<LinkedHashMap<String, Object>> rowDatas, String keyword) {
+        ColumnData datas = new ColumnData();
+        ArrayList<LinkedHashMap<String, Object>> coldatas = new ArrayList<LinkedHashMap<String, Object>>();
         ArrayList<String> colNames = new ArrayList<String>();
         int rowCount = 0;
         int colCount = 0;
-        for (LinkedHashMap<String, Object> row : rowData) {
+        for (LinkedHashMap<String, Object> row : rowDatas) {
             if (keyword != null) {
                 String keyNow = row.remove(keyword).toString();
                 colNames.add(keyNow);
@@ -77,68 +78,68 @@ public final class TableDataProcessor {
             rowCount++;
 
             for (Map.Entry<String, Object> element : row.entrySet()) {
-                LinkedHashMap<String, Object> colDataItem = new LinkedHashMap<String, Object>();
-                colDataItem.put(COLUMN_KEY_NAME, element.getKey());
-                colDataItem.put(COLUMN_VALUE_NAME, element.getValue());
-                colData.add(colDataItem);
+                LinkedHashMap<String, Object> colData = new LinkedHashMap<String, Object>();
+                colData.put(COLUMN_KEY_NAME, element.getKey());
+                colData.put(COLUMN_VALUE_NAME, element.getValue());
+                coldatas.add(colData);
                 if (rowCount == 1) {
                     colCount++;
                 }
             }
         }
-        data.setCount(colCount);
-        data.setData(colData);
-        data.setNames(colNames);
-        return data;
+        datas.setCount(colCount);
+        datas.setDatas(coldatas);
+        datas.setNames(colNames);
+        return datas;
     }
 
     /**
      * 将行数据转化为多个表格中的列数据 和{@link #row2col(ArrayList<LinkedHashMap<String,Object>>, String)}类似，
      * 只不过这里是返回多个表格数据
      * 
-     * @param rowData 原始数据
+     * @param rowDatas 原始数据
      * @param keyword the keyword
      * @return 生成的列数据的对象
      */
-    public static ColumnData multiRow2Col(ArrayList<LinkedHashMap<String, Object>> rowData, String keyword) {
-        ColumnData data = new ColumnData();
-        ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableData = new ArrayList<ArrayList<LinkedHashMap<String, Object>>>();
+    public static ColumnData mutilRow2col(ArrayList<LinkedHashMap<String, Object>> rowDatas, String keyword) {
+        ColumnData datas = new ColumnData();
+        ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableDatas = new ArrayList<ArrayList<LinkedHashMap<String, Object>>>();
 
         ArrayList<String> colNames = new ArrayList<String>();
         int rowCount = 0;
 
-        for (LinkedHashMap<String, Object> row : rowData) {
+        for (LinkedHashMap<String, Object> row : rowDatas) {
             if (keyword != null) {
                 String keyNow = row.remove(keyword).toString();
                 colNames.add(keyNow);
             }
             rowCount++;
 
-            ArrayList<LinkedHashMap<String, Object>> colData = new ArrayList<LinkedHashMap<String, Object>>();
+            ArrayList<LinkedHashMap<String, Object>> coldatas = new ArrayList<LinkedHashMap<String, Object>>();
             for (Map.Entry<String, Object> element : row.entrySet()) {
-                LinkedHashMap<String, Object> colDataItem = new LinkedHashMap<String, Object>();
-                colDataItem.put(COLUMN_KEY_NAME, element.getKey());
-                colDataItem.put(COLUMN_VALUE_NAME, element.getValue());
-                colData.add(colDataItem);
+                LinkedHashMap<String, Object> colData = new LinkedHashMap<String, Object>();
+                colData.put(COLUMN_KEY_NAME, element.getKey());
+                colData.put(COLUMN_VALUE_NAME, element.getValue());
+                coldatas.add(colData);
 
             }
-            tableData.add(colData);
+            tableDatas.add(coldatas);
         }
-        data.setCount(rowCount);
-        data.setTableData(tableData);
-        data.setNames(colNames);
-        return data;
+        datas.setCount(rowCount);
+        datas.setTableDatas(tableDatas);
+        datas.setNames(colNames);
+        return datas;
     }
 
     /**
      * 将行数据转化为列数据，这里只是调用了{@link #row2col(ArrayList<LinkedHashMap<String,Object>>, String)}，
      * 将第二个参数置为null。
      * 
-     * @param rowData 原始数据
+     * @param rowDatas 原始数据
      * @return 生成的列数据的对象
      */
-    public static ColumnData row2col(ArrayList<LinkedHashMap<String, Object>> rowData) {
-        return row2col(rowData, null);
+    public static ColumnData row2col(ArrayList<LinkedHashMap<String, Object>> rowDatas) {
+        return row2col(rowDatas, null);
     }
     
     /**
@@ -198,10 +199,10 @@ public final class TableDataProcessor {
         private ArrayList<String>                                   names;
 
         /** 单个表格数据. */
-        private ArrayList<LinkedHashMap<String, Object>> data;
+        private ArrayList<LinkedHashMap<String, Object>>            datas;
 
         /** 多个表格数据. */
-        private ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableData;
+        private ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableDatas;
 
         /** 返回的数据总数，如果返回单个表格，则为表格行数；如果返回多个表格数据，则为表格个数. */
         private int                                                 count;
@@ -234,19 +235,19 @@ public final class TableDataProcessor {
         /**
          * 获取单个表格数据
          * 
-         * @return the data
+         * @return the datas
          */
-        public ArrayList<LinkedHashMap<String, Object>> getData() {
-            return data;
+        public ArrayList<LinkedHashMap<String, Object>> getDatas() {
+            return datas;
         }
 
         /**
          * 设置单个表格数据
          * 
-         * @param data the data
+         * @param datas the datas
          */
-        public void setData(ArrayList<LinkedHashMap<String, Object>> data) {
-            this.data = data;
+        public void setDatas(ArrayList<LinkedHashMap<String, Object>> datas) {
+            this.datas = datas;
         }
 
         /**
@@ -270,19 +271,19 @@ public final class TableDataProcessor {
         /**
          * 返回多个表格数据
          * 
-         * @return the table data
+         * @return the table datas
          */
-        public ArrayList<ArrayList<LinkedHashMap<String, Object>>> getTableData() {
-            return tableData;
+        public ArrayList<ArrayList<LinkedHashMap<String, Object>>> getTableDatas() {
+            return tableDatas;
         }
 
         /**
          * 设置多个表格数据
          * 
-         * @param tableData the table data
+         * @param tableDatas the table datas
          */
-        public void setTableData(ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableData) {
-            this.tableData = tableData;
+        public void setTableDatas(ArrayList<ArrayList<LinkedHashMap<String, Object>>> tableDatas) {
+            this.tableDatas = tableDatas;
         }
 
     }

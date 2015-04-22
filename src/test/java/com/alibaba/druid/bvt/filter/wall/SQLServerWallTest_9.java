@@ -15,16 +15,22 @@
  */
 package com.alibaba.druid.bvt.filter.wall;
 
+import java.util.Collections;
+
 import junit.framework.TestCase;
 
 import org.junit.Assert;
 
+import com.alibaba.druid.sql.visitor.SQLEvalVisitorUtils;
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.wall.WallProvider;
 import com.alibaba.druid.wall.spi.SQLServerWallProvider;
 
 /**
  * SQLServerWallTest
  * 
+ * @author RaymondXiu
+ * @version 1.0, 2012-3-18
  * @see
  */
 public class SQLServerWallTest_9 extends TestCase {
@@ -38,7 +44,7 @@ public class SQLServerWallTest_9 extends TestCase {
                      + " AND status='P'" //
                      + " AND islast=0" //
                      + " AND NOT EXISTS (select m.id from project_measures m WHERE m.snapshot_id=s.id)";
-
+        
         Assert.assertTrue(provider.checkValid(sql));
 
     }

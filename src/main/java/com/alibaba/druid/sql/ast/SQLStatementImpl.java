@@ -20,26 +20,12 @@ import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public abstract class SQLStatementImpl extends SQLObjectImpl implements SQLStatement {
 
-    private String dbType;
-
     public SQLStatementImpl(){
 
     }
-    
-    public SQLStatementImpl(String dbType){
-        this.dbType = dbType;
-    }
-    
-    public String getDbType() {
-        return dbType;
-    }
-
-    public void setDbType(String dbType) {
-        this.dbType = dbType;
-    }
 
     public String toString() {
-        return SQLUtils.toSQLString(this, dbType);
+        return SQLUtils.toSQLString(this);
     }
 
     @Override

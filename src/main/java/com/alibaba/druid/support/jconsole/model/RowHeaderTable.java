@@ -15,6 +15,11 @@
  */
 package com.alibaba.druid.support.jconsole.model;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.util.ArrayList;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -24,10 +29,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.util.ArrayList;
 
 /**
  * 用于显示RowHeader的JTable，只需要将其加入JScrollPane的RowHeaderView即可为JTable生成行标题
@@ -40,7 +41,7 @@ public class RowHeaderTable extends JTable {
      * 为JTable添加RowHeader，
      * 
      * @param refTable 需要添加rowHeader的JTable
-     * @param columnWidth rowHeader的宽度
+     * @param columnWideth rowHeader的宽度
      */
     public RowHeaderTable(JTable refTable, int columnWidth){
         this(null, refTable, columnWidth, 1);
@@ -65,35 +66,35 @@ public class RowHeaderTable extends JTable {
 final class RowHeaderRenderer extends JLabel implements TableCellRenderer, ListSelectionListener {
 
     private static final long serialVersionUID = 1L;
-    private JTable            refTable;              // 需要添加rowHeader的JTable
+    private JTable            reftable;              // 需要添加rowHeader的JTable
     private JTable            tableShow;             // 用于显示rowHeader的JTable
     private ArrayList<String> headerList;
     private int               rowHeightNow;
     private int               rowSpan;
 
-    public RowHeaderRenderer(JTable refTable, JTable tableShow){
-        this(null, refTable, tableShow, 0);
+    public RowHeaderRenderer(JTable reftable, JTable tableShow){
+        this(null, reftable, tableShow, 0);
     }
 
-    public RowHeaderRenderer(ArrayList<String> headerList, JTable refTable, JTable tableShow, int rowSpan){
+    public RowHeaderRenderer(ArrayList<String> headerList, JTable reftable, JTable tableShow, int rowSpan){
         this.headerList = headerList;
-        this.refTable = refTable;
+        this.reftable = reftable;
         this.tableShow = tableShow;
-        // 增加监听器，实现当在refTable中选择行时，RowHeader会发生颜色变化
-        ListSelectionModel listModel = refTable.getSelectionModel();
+        // 增加监听器，实现当在reftable中选择行时，RowHeader会发生颜色变化
+        ListSelectionModel listModel = reftable.getSelectionModel();
         listModel.addListSelectionListener(this);
-        rowHeightNow = refTable.getRowCount() * refTable.getRowHeight();
+        rowHeightNow = reftable.getRowCount() * reftable.getRowHeight();
         this.rowSpan = rowSpan;
         if (rowSpan > 1) {
-            rowHeightNow = rowSpan * refTable.getRowHeight();
+            rowHeightNow = rowSpan * reftable.getRowHeight();
         }
     }
 
     public Component getTableCellRendererComponent(JTable table, Object obj, boolean isSelected, boolean hasFocus,
                                                    int row, int col) {
-        int rowCountNow = refTable.getRowCount() / rowSpan;
+        int rowCountNow = reftable.getRowCount() / rowSpan;
         ((DefaultTableModel) table.getModel()).setRowCount(rowCountNow);
-        JTableHeader header = refTable.getTableHeader();
+        JTableHeader header = reftable.getTableHeader();
         this.setOpaque(true);
         setBorder(UIManager.getBorder("TableHeader.cellBorder"));// 设置为TableHeader的边框类型
         setHorizontalAlignment(CENTER);// 让text居中显示
@@ -134,16 +135,16 @@ final class RowHeaderRenderer extends JLabel implements TableCellRenderer, ListS
     }
 
     private boolean isSelect(int row) {
-        int[] sel = refTable.getSelectedRows();
+        int[] sel = reftable.getSelectedRows();
         if (rowSpan <= 1) {
-            for (int item : sel) {
-                if (item == row) {
+            for (int i = 0, len = sel.length; i < len; i++) {
+                if (sel[i] == row) {
                     return true;
                 }
             }
         } else {
-            for (int item : sel) {
-                if (item / rowSpan == row) {
+            for (int i = 0, len = sel.length; i < len; i++) {
+                if (sel[i] / rowSpan == row) {
                     return true;
                 }
             }

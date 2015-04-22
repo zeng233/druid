@@ -25,8 +25,8 @@ public class GetConnectionTimeoutException extends SQLException {
         super(reason);
     }
 
-    public GetConnectionTimeoutException(String message, Throwable cause){
-        super(message, cause);
+    public GetConnectionTimeoutException(String mesage, Throwable cause){
+        super(mesage, cause);
     }
 
 }

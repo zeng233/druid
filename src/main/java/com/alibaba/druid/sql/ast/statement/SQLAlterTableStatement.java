@@ -26,14 +26,6 @@ public class SQLAlterTableStatement extends SQLStatementImpl implements SQLDDLSt
 
     private SQLExprTableSource      tableSource;
     private List<SQLAlterTableItem> items = new ArrayList<SQLAlterTableItem>();
-    
-    public SQLAlterTableStatement() {
-        
-    }
-    
-    public SQLAlterTableStatement(String dbType) {
-        super (dbType);
-    }
 
     public List<SQLAlterTableItem> getItems() {
         return items;

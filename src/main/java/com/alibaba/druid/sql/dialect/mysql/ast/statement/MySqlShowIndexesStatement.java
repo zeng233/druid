@@ -15,9 +15,6 @@
  */
 package com.alibaba.druid.sql.dialect.mysql.ast.statement;
 
-import java.util.List;
-
-import com.alibaba.druid.sql.ast.SQLCommentHint;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
@@ -25,9 +22,8 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitor;
 
 public class MySqlShowIndexesStatement extends MySqlStatementImpl implements MySqlShowStatement {
 
-    private SQLName              table;
-    private SQLName              database;
-    private List<SQLCommentHint> hints;
+    private SQLName table;
+    private SQLName database;
 
     public SQLName getTable() {
         return table;
@@ -57,13 +53,5 @@ public class MySqlShowIndexesStatement extends MySqlStatementImpl implements MyS
             acceptChild(visitor, database);
         }
         visitor.endVisit(this);
-    }
-
-    public List<SQLCommentHint> getHints() {
-        return hints;
-    }
-
-    public void setHints(List<SQLCommentHint> hints) {
-        this.hints = hints;
     }
 }

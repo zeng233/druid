@@ -20,13 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBooleanExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLHexExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
@@ -36,6 +33,7 @@ import com.alibaba.druid.sql.ast.expr.SQLNumberExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLUnaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlBooleanExpr;
 import com.alibaba.druid.sql.visitor.SQLEvalVisitor;
 import com.alibaba.druid.sql.visitor.SQLEvalVisitorUtils;
 import com.alibaba.druid.sql.visitor.functions.Function;
@@ -96,15 +94,6 @@ public class MySqlEvalVisitorImpl extends MySqlASTVisitorAdapter implements SQLE
     public boolean visit(SQLNumberExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }
-    
-    public boolean visit(SQLHexExpr x) {
-        return SQLEvalVisitorUtils.visit(this, x);
-    }
-    
-    @Override
-    public boolean visit(SQLBinaryExpr x) {
-        return SQLEvalVisitorUtils.visit(this, x);
-    }
 
     @Override
     public boolean visit(SQLCaseExpr x) {
@@ -136,6 +125,12 @@ public class MySqlEvalVisitorImpl extends MySqlASTVisitorAdapter implements SQLE
         return SQLEvalVisitorUtils.visit(this, x);
     }
 
+    @Override
+    public boolean visit(MySqlBooleanExpr x) {
+        x.getAttributes().put(EVAL_VALUE, x.getValue());
+        return false;
+    }
+
     public boolean isMarkVariantIndex() {
         return markVariantIndex;
     }
@@ -156,16 +151,5 @@ public class MySqlEvalVisitorImpl extends MySqlASTVisitorAdapter implements SQLE
 
     public boolean visit(SQLIdentifierExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
-    }
-
-    @Override
-    public void unregisterFunction(String funcName) {
-        functions.remove(funcName);
-    }
-    
-    @Override
-    public boolean visit(SQLBooleanExpr x) {
-        x.getAttributes().put(EVAL_VALUE, x.getValue());
-        return false;
     }
 }

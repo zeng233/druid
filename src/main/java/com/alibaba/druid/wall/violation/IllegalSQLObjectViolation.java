@@ -23,10 +23,10 @@ public class IllegalSQLObjectViolation implements Violation {
     private final String sqlPart;
     private final int errorCode;
 
-    public IllegalSQLObjectViolation(int errorCode, String message, String sqlPart){
+    public IllegalSQLObjectViolation(int errorCode, String message, String condition){
         this.errorCode = errorCode;
         this.message = message;
-        this.sqlPart = sqlPart;
+        this.sqlPart = condition;
     }
 
     public String getSqlPart() {

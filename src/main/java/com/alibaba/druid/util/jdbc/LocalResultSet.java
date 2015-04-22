@@ -48,7 +48,8 @@ public class LocalResultSet extends ResultSetBase {
     
     public Object getObjectInternal(int columnIndex) {
         Object[] row = rows.get(rowIndex);
-        return row[columnIndex - 1];
+        Object obj = row[columnIndex - 1];
+        return obj;
     }
 
     @Override

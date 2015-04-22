@@ -40,10 +40,6 @@ public class Log4jImpl implements Log {
     public Log4jImpl(String loggerName){
         log = Logger.getLogger(loggerName);
     }
-    
-    public Logger getLog() {
-        return log;
-    }
 
     public boolean isDebugEnabled() {
         return log.isDebugEnabled();

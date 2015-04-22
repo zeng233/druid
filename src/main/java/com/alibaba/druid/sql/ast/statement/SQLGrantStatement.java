@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.SQLObject;
 import com.alibaba.druid.sql.ast.SQLStatementImpl;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
@@ -27,27 +26,19 @@ public class SQLGrantStatement extends SQLStatementImpl {
 
     private final List<SQLExpr> privileges = new ArrayList<SQLExpr>();
 
-    private SQLObject           on;
+    private SQLExpr             on;
     private SQLExpr             to;
 
-    public SQLGrantStatement(){
-
-    }
-
-    public SQLGrantStatement(String dbType){
-        super(dbType);
-    }
-
     // mysql
-    private SQLObjectType objectType;
-    private SQLExpr       maxQueriesPerHour;
-    private SQLExpr       maxUpdatesPerHour;
-    private SQLExpr       maxConnectionsPerHour;
-    private SQLExpr       maxUserConnections;
+    private ObjectType          objectType;
+    private SQLExpr             maxQueriesPerHour;
+    private SQLExpr             maxUpdatesPerHour;
+    private SQLExpr             maxConnectionsPerHour;
+    private SQLExpr             maxUserConnections;
 
-    private boolean       adminOption;
+    private boolean             adminOption;
 
-    private SQLExpr       identifiedBy;
+    private SQLExpr             identifiedBy;
 
     @Override
     protected void accept0(SQLASTVisitor visitor) {
@@ -59,21 +50,20 @@ public class SQLGrantStatement extends SQLStatementImpl {
         visitor.endVisit(this);
     }
 
-    public SQLObjectType getObjectType() {
+    public ObjectType getObjectType() {
         return objectType;
     }
 
-    public void setObjectType(SQLObjectType objectType) {
+    public void setObjectType(ObjectType objectType) {
         this.objectType = objectType;
     }
 
-    public SQLObject getOn() {
+    public SQLExpr getOn() {
         return on;
     }
 
-    public void setOn(SQLObject on) {
+    public void setOn(SQLExpr on) {
         this.on = on;
-        on.setParent(this);
     }
 
     public SQLExpr getTo() {
@@ -134,5 +124,9 @@ public class SQLGrantStatement extends SQLStatementImpl {
 
     public void setIdentifiedBy(SQLExpr identifiedBy) {
         this.identifiedBy = identifiedBy;
+    }
+
+    public static enum ObjectType {
+        TABLE, FUNCTION, PROCEDURE, USER
     }
 }

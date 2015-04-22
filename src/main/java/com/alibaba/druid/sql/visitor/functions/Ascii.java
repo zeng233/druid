@@ -16,7 +16,6 @@
 package com.alibaba.druid.sql.visitor.functions;
 
 import static com.alibaba.druid.sql.visitor.SQLEvalVisitor.EVAL_VALUE;
-import static com.alibaba.druid.sql.visitor.SQLEvalVisitor.EVAL_VALUE_NULL;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
@@ -32,19 +31,15 @@ public class Ascii implements Function {
         }
         SQLExpr param = x.getParameters().get(0);
         param.accept(visitor);
-        
+
         Object paramValue = param.getAttributes().get(EVAL_VALUE);
         if (paramValue == null) {
             return SQLEvalVisitor.EVAL_ERROR;
         }
-        
-        if (paramValue == EVAL_VALUE_NULL) {
-            return EVAL_VALUE_NULL;
-        }
 
         String strValue = paramValue.toString();
         if (strValue.length() == 0) {
-            return 0;
+            return SQLEvalVisitor.EVAL_ERROR;
         }
 
         int ascii = strValue.charAt(0);

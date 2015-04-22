@@ -61,10 +61,6 @@ public class Unhex implements Function {
 
         if (param0Value instanceof String) {
             byte[] bytes = HexBin.decode((String) param0Value);
-            if (bytes == null) {
-                return SQLEvalVisitor.EVAL_VALUE_NULL;
-            }
-            
             String result;
             try {
                 result = new String(bytes, "UTF-8");

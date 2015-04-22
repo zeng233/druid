@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
@@ -137,17 +136,7 @@ public class PGEvalVisitor extends PGASTVisitorAdapter implements SQLEvalVisitor
         functions.put(funcName, function);
     }
     
-    @Override
-    public void unregisterFunction(String funcName) {
-        functions.remove(funcName);
-    }
-
     public boolean visit(SQLIdentifierExpr x) {
-        return SQLEvalVisitorUtils.visit(this, x);
-    }
-    
-    @Override
-    public boolean visit(SQLBinaryExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }
 }

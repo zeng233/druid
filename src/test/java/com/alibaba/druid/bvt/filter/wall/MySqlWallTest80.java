@@ -45,7 +45,7 @@ public class MySqlWallTest80 extends TestCase {
 
         provider.getConfig().setCommentAllow(true);
 
-        Assert.assertTrue(provider.checkValid(//
+        Assert.assertFalse(provider.checkValid(//
         "SELECT * FROM T WHERE FID = ? OR FID LIKE 1 --"));
 
         Assert.assertEquals(1, provider.getTableStats().size());

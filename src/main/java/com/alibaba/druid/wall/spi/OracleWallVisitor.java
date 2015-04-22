@@ -15,6 +15,9 @@
  */
 package com.alibaba.druid.wall.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLObject;
@@ -48,7 +51,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectTableReference;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleASTVisitorAdapter;
-import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.wall.Violation;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallProvider;
@@ -56,25 +58,16 @@ import com.alibaba.druid.wall.WallVisitor;
 import com.alibaba.druid.wall.violation.ErrorCode;
 import com.alibaba.druid.wall.violation.IllegalSQLObjectViolation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class OracleWallVisitor extends OracleASTVisitorAdapter implements WallVisitor {
 
     private final WallConfig      config;
     private final WallProvider    provider;
-    private final List<Violation> violations      = new ArrayList<Violation>();
-    private boolean               sqlModified     = false;
-    private boolean               sqlEndOfComment = false;
+    private final List<Violation> violations  = new ArrayList<Violation>();
+    private boolean               sqlModified = false;
 
     public OracleWallVisitor(WallProvider provider){
         this.config = provider.getConfig();
         this.provider = provider;
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.ORACLE;
     }
 
     @Override
@@ -128,7 +121,8 @@ public class OracleWallVisitor extends OracleASTVisitorAdapter implements WallVi
     }
 
     public boolean visit(SQLBinaryOpExpr x) {
-        return WallVisitorUtils.check(this, x);
+        WallVisitorUtils.check(this, x);
+        return true;
     }
 
     @Override
@@ -211,7 +205,7 @@ public class OracleWallVisitor extends OracleASTVisitorAdapter implements WallVi
 
         return true;
     }
-
+    
     @Override
     public void endVisit(SQLSelectStatement x) {
         WallVisitorUtils.clearWallTopStatementContext();
@@ -274,7 +268,7 @@ public class OracleWallVisitor extends OracleASTVisitorAdapter implements WallVi
         WallVisitorUtils.checkDelete(this, x);
         return true;
     }
-
+    
     @Override
     public void endVisit(OracleDeleteStatement x) {
         endVisit((SQLDeleteStatement) x);
@@ -343,19 +337,9 @@ public class OracleWallVisitor extends OracleASTVisitorAdapter implements WallVi
     public boolean visit(SQLCallStatement x) {
         return false;
     }
-
+    
     @Override
     public boolean visit(SQLCreateTriggerStatement x) {
         return false;
-    }
-    
-    @Override
-    public boolean isSqlEndOfComment() {
-        return this.sqlEndOfComment;
-    }
-
-    @Override
-    public void setSqlEndOfComment(boolean sqlEndOfComment) {
-        this.sqlEndOfComment = sqlEndOfComment;
     }
 }

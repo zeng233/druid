@@ -34,7 +34,7 @@ public class SQLPropertyExpr extends SQLExprImpl implements SQLName {
 
     }
 
-    public String getSimpleName() {
+    public String getSimleName() {
         return name;
     }
 

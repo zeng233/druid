@@ -356,7 +356,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
         Savepoint savepoint = chain.connection_setSavepoint(connection);
 
         if (isConnectionLogEnabled()) {
-            connectionLog("{conn " + connection.getId() + "} setSavepoint-" + savepointToString(savepoint));
+            connectionLog("{conn " + connection.getId() + "} setSavepoint-" + savepoint.getSavepointId());
         }
 
         return savepoint;
@@ -389,7 +389,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
         super.connection_rollback(chain, connection, savePoint);
 
         if (connectionRollbackAfterLogEnable && isConnectionLogEnabled()) {
-            connectionLog("{conn " + connection.getId() + "} rollback -> " + savepointToString(savePoint));
+            connectionLog("{conn " + connection.getId() + "} rollback -> " + savePoint.getSavepointId());
         }
     }
 
@@ -446,7 +446,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
             double millis = nanos / (1000 * 1000);
 
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + "} executed. "
-                         + millis + " millis. \n" + sql);
+                         + millis + " millis. " + sql);
         }
     }
 
@@ -472,7 +472,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
             double millis = nanos / (1000 * 1000);
 
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement)
-                         + "} batch executed. " + millis + " millis. \n" + sql);
+                         + "} batch executed. " + millis + " millis. " + sql);
         }
     }
 
@@ -494,7 +494,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
             double millis = nanos / (1000 * 1000);
 
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + ", rs-"
-                         + resultSet.getId() + "} query executed. " + millis + " millis. \n" + sql);
+                         + resultSet.getId() + "} query executed. " + millis + " millis. " + sql);
         }
     }
 
@@ -516,7 +516,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
             double millis = nanos / (1000 * 1000);
 
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement)
-                         + "} update executed. effort " + updateCount + ". " + millis + " millis. \n" + sql);
+                         + "} update executed. effort " + updateCount + ". " + millis + " millis. " + sql);
         }
     }
 
@@ -527,7 +527,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
 
         int parametersSize = statement.getParametersSize();
         if (parametersSize == 0) {
-            statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + "} executed. \n"
+            statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + "} executed. "
                          + sql);
             return;
         }
@@ -540,7 +540,7 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
 
         String dbType = statement.getConnectionProxy().getDirectDataSource().getDbType();
         String formattedSql = SQLUtils.format(sql, dbType, parameters);
-        statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + "} executed. \n"
+        statementLog("{conn-" + statement.getConnectionProxy().getId() + ", " + stmtId(statement) + "} executed. "
                      + formattedSql);
     }
 
@@ -709,14 +709,14 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
     protected void statementPrepareAfter(PreparedStatementProxy statement) {
         if (statementPrepareAfterLogEnable && isStatementLogEnabled()) {
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", pstmt-" + statement.getId()
-                         + "} created. \n" + statement.getSql());
+                         + "} created. " + statement.getSql());
         }
     }
 
     protected void statementPrepareCallAfter(CallableStatementProxy statement) {
         if (statementPrepareCallAfterLogEnable && isStatementLogEnabled()) {
             statementLog("{conn-" + statement.getConnectionProxy().getId() + ", cstmt-" + statement.getId()
-                         + "} created. \n" + statement.getSql());
+                         + "} created. " + statement.getSql());
         }
     }
 
@@ -858,19 +858,5 @@ public abstract class LogFilter extends FilterEventAdapter implements LogFilterM
             return (T) this;
         }
         return null;
-    }
-    
-    protected String savepointToString(Savepoint savePoint) {
-    	String savePointString = null;
-    	try{
-    		savePointString = savePoint.getSavepointName();
-    	} catch (SQLException e) {
-    		try {
-				savePointString = String.valueOf(savePoint.getSavepointId());
-			} catch (SQLException e1) {
-				savePointString = savePoint.toString();
-			}
-    	}
-    	return savePointString;
     }
 }

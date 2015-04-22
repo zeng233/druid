@@ -15,22 +15,22 @@
  */
 package com.alibaba.druid.sql.ast.statement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLDataType;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLObjectImpl;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SQLColumnDefinition extends SQLObjectImpl implements SQLTableElement {
 
     protected SQLName                         name;
     protected SQLDataType                     dataType;
     protected SQLExpr                         defaultExpr;
-    protected final List<SQLColumnConstraint> constraints = new ArrayList<SQLColumnConstraint>(0);
-    protected SQLExpr                          comment;
+    protected final List<SQLColumnConstraint> constaints = new ArrayList<SQLColumnConstraint>(0);
+    protected String                          comment;
 
     protected Boolean                         enable;
 
@@ -73,8 +73,8 @@ public class SQLColumnDefinition extends SQLObjectImpl implements SQLTableElemen
         this.defaultExpr = defaultExpr;
     }
 
-    public List<SQLColumnConstraint> getConstraints() {
-        return constraints;
+    public List<SQLColumnConstraint> getConstaints() {
+        return constaints;
     }
 
     @Override
@@ -94,16 +94,16 @@ public class SQLColumnDefinition extends SQLObjectImpl implements SQLTableElemen
             this.acceptChild(visitor, name);
             this.acceptChild(visitor, dataType);
             this.acceptChild(visitor, defaultExpr);
-            this.acceptChild(visitor, constraints);
+            this.acceptChild(visitor, constaints);
         }
         visitor.endVisit(this);
     }
 
-    public SQLExpr getComment() {
+    public String getComment() {
         return comment;
     }
 
-    public void setComment(SQLExpr comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 

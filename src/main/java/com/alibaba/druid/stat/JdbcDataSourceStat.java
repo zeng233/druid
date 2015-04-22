@@ -15,19 +15,6 @@
  */
 package com.alibaba.druid.stat;
 
-import com.alibaba.druid.Constants;
-import com.alibaba.druid.filter.Filter;
-import com.alibaba.druid.filter.stat.StatFilter;
-import com.alibaba.druid.proxy.jdbc.DataSourceProxy;
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
-import com.alibaba.druid.util.Histogram;
-
-import javax.management.JMException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,6 +25,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.management.JMException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
+
+import com.alibaba.druid.Constants;
+import com.alibaba.druid.filter.Filter;
+import com.alibaba.druid.filter.stat.StatFilter;
+import com.alibaba.druid.proxy.jdbc.DataSourceProxy;
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
+import com.alibaba.druid.util.Histogram;
 
 public class JdbcDataSourceStat implements JdbcDataSourceStatMBean {
 
@@ -51,7 +52,7 @@ public class JdbcDataSourceStat implements JdbcDataSourceStatMBean {
     private final JdbcResultSetStat                             resultSetStat           = new JdbcResultSetStat();
     private final JdbcStatementStat                             statementStat           = new JdbcStatementStat();
 
-    private int                                                 maxSqlSize              = 1000;
+    private int                                                 maxSqlSize              = 1000 * 1;
 
     private ReentrantReadWriteLock                              lock                    = new ReentrantReadWriteLock();
     private final LinkedHashMap<String, JdbcSqlStat>            sqlStatMap;
@@ -363,7 +364,8 @@ public class JdbcDataSourceStat implements JdbcDataSourceStatMBean {
         }
 
         List<JdbcSqlStatValue> values = new ArrayList<JdbcSqlStatValue>(stats.size());
-        for (JdbcSqlStat stat : stats) {
+        for (int i = 0; i < stats.size(); ++i) {
+            JdbcSqlStat stat = stats.get(i);
             JdbcSqlStatValue value = stat.getValueAndReset();
             if (value.getExecuteCount() == 0 && value.getRunningCount() == 0) {
                 continue;
@@ -377,7 +379,9 @@ public class JdbcDataSourceStat implements JdbcDataSourceStatMBean {
         List<JdbcSqlStat> stats = new ArrayList<JdbcSqlStat>(sqlStatMap.size());
         lock.readLock().lock();
         try {
-            for (Map.Entry<String, JdbcSqlStat> entry : sqlStatMap.entrySet()) {
+            Iterator<Map.Entry<String, JdbcSqlStat>> iter = sqlStatMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, JdbcSqlStat> entry = iter.next();
                 JdbcSqlStat stat = entry.getValue();
                 if (stat.getRunningCount() >= 0) {
                     stats.add(entry.getValue());
@@ -388,7 +392,8 @@ public class JdbcDataSourceStat implements JdbcDataSourceStatMBean {
         }
 
         List<JdbcSqlStatValue> values = new ArrayList<JdbcSqlStatValue>(stats.size());
-        for (JdbcSqlStat stat : stats) {
+        for (int i = 0; i < stats.size(); ++i) {
+            JdbcSqlStat stat = stats.get(i);
             JdbcSqlStatValue value = stat.getValue(false);
             if (value.getRunningCount() > 0) {
                 values.add(value);

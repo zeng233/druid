@@ -37,14 +37,6 @@ public class SQLCreateTriggerStatement extends SQLStatementImpl {
     private boolean                  forEachRow    = false;
 
     private SQLStatement             body;
-    
-    public SQLCreateTriggerStatement() {
-        
-    }
-    
-    public SQLCreateTriggerStatement(String dbType) {
-        super (dbType);
-    }
 
     protected void accept0(SQLASTVisitor visitor) {
         if (visitor.visit(this)) {

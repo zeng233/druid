@@ -15,27 +15,23 @@
  */
 package com.alibaba.druid.sql.dialect.mysql.visitor;
 
+import java.util.List;
+import java.util.Properties;
+
 import com.alibaba.druid.sql.ast.SQLObject;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLHexExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumberExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement.ValuesClause;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.visitor.ParameterizedOutputVisitorUtils;
 import com.alibaba.druid.sql.visitor.ParameterizedVisitor;
-
-import java.security.AccessControlException;
-import java.util.List;
-import java.util.Properties;
 
 public class MySqlParameterizedOutputVisitor extends MySqlOutputVisitor implements ParameterizedVisitor {
 
@@ -50,13 +46,10 @@ public class MySqlParameterizedOutputVisitor extends MySqlOutputVisitor implemen
     public MySqlParameterizedOutputVisitor(Appendable appender){
         super(appender);
 
-        try {
-            configFromProperty(System.getProperties());
-        } catch (AccessControlException e) {
-        }
+        configFromPropety(System.getProperties());
     }
 
-    public void configFromProperty(Properties properties) {
+    public void configFromPropety(Properties properties) {
         {
             String property = properties.getProperty("druid.parameterized.shardingSupport");
             if ("true".equals(property)) {
@@ -94,7 +87,7 @@ public class MySqlParameterizedOutputVisitor extends MySqlOutputVisitor implemen
             SQLObject parent = x.getParent();
             computeSharding = parent instanceof SQLExprTableSource || parent instanceof SQLPropertyExpr;
         }
-
+        
         if (computeSharding) {
             int pos = name.lastIndexOf('_');
             if (pos != -1 && pos != name.length() - 1) {
@@ -167,30 +160,6 @@ public class MySqlParameterizedOutputVisitor extends MySqlOutputVisitor implemen
     }
 
     public boolean visit(SQLNCharExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
-            return super.visit(x);
-        }
-
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-
-    public boolean visit(SQLNullExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
-            return super.visit(x);
-        }
-
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-    
-    public boolean visit(SQLHexExpr x) {
-        if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
-            return super.visit(x);
-        }
-
-        return ParameterizedOutputVisitorUtils.visit(this, x);
-    }
-    
-    public boolean visit(MySqlCharExpr x) {
         if (!ParameterizedOutputVisitorUtils.checkParameterize(x)) {
             return super.visit(x);
         }

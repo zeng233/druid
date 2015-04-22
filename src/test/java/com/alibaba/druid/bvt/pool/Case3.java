@@ -56,7 +56,7 @@ public class Case3 extends TestCase {
     // dataSource.close();
     // }
     protected void setUp() throws Exception {
-        DruidDataSourceStatManager.clear();
+        DruidDataSourceStatManager.cear();
     }
 
     protected void tearDown() throws Exception {

@@ -15,7 +15,6 @@
  */
 package com.alibaba.druid.sql.dialect.oracle.ast.stmt;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.FlashbackQueryClause;
@@ -91,7 +90,4 @@ public class OracleSelectJoin extends SQLJoinTableSource implements OracleSelect
         }
     }
 
-    public String toString () {
-        return SQLUtils.toOracleString(this);
-    }
 }

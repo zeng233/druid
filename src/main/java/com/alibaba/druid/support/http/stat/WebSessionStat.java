@@ -15,14 +15,14 @@
  */
 package com.alibaba.druid.support.http.stat;
 
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
+import static com.alibaba.druid.util.JdbcSqlStatUtils.get;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
-import static com.alibaba.druid.util.JdbcSqlStatUtils.get;
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
 
 public class WebSessionStat {
 
@@ -214,6 +214,8 @@ public class WebSessionStat {
             if (running > max) {
                 if (concurrentMaxUpdater.compareAndSet(this, max, running)) {
                     break;
+                } else {
+                    continue;
                 }
             } else {
                 break;
@@ -262,7 +264,7 @@ public class WebSessionStat {
         }
 
         if (remoteAddresses.length() > 256) {
-            LOG.error("session ip change too many");
+            LOG.error("sessoin ip change too many");
             return;
         }
 
@@ -385,7 +387,7 @@ public class WebSessionStat {
         val.jdbcRollbackCount = get(this, jdbcRollbackCountUpdater, reset);
         val.createTimeMillis = createTimeMillis;
         val.lastAccessTimeMillis = lastAccessTimeMillis;
-        val.remoteAddress = remoteAddresses;
+        val.remoteAddresse = remoteAddresses;
         val.principal = principal;
         val.userAgent = userAgent;
 

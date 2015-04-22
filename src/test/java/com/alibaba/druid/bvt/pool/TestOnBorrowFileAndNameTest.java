@@ -18,7 +18,7 @@ public class TestOnBorrowFileAndNameTest extends TestCase {
     private DruidDataSource dataSource;
 
     protected void setUp() throws Exception {
-        DruidDataSourceStatManager.clear();
+        DruidDataSourceStatManager.cear();
 
         dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");

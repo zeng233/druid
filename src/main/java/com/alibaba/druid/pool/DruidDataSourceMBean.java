@@ -81,8 +81,4 @@ public interface DruidDataSourceMBean extends DruidAbstractDataSourceMBean {
     void setTimeBetweenLogStatsMillis(long timeBetweenLogStatsMillis);
     
     void setConnectionProperties(String connectionProperties);
-    
-    int fill() throws SQLException;
-    
-    int fill(int toCount) throws SQLException;
 }

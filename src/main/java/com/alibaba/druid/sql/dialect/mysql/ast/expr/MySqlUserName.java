@@ -45,11 +45,11 @@ public class MySqlUserName extends MySqlExprImpl implements SQLName {
         visitor.endVisit(this);
     }
 
-    public String getSimpleName() {
+    public String getSimleName() {
         return userName + '@' + host;
     }
 
     public String toString() {
-        return getSimpleName();
+        return getSimleName();
     }
 }

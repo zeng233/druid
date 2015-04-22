@@ -35,7 +35,7 @@ import com.alibaba.druid.support.logging.LogFactory;
  * 
  * @author sandzhang<sandzhangtoo@gmail.com>
  */
-public class StatViewServlet extends ResourceServlet {
+public class StatViewServlet extends ResourceSerlvet {
 
     private final static Log      LOG                     = LogFactory.getLog(StatViewServlet.class);
 

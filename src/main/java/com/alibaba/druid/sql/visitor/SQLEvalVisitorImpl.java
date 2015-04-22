@@ -20,12 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBooleanExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLHexExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
@@ -89,10 +86,6 @@ public class SQLEvalVisitorImpl extends SQLASTVisitorAdapter implements SQLEvalV
     public boolean visit(SQLNumberExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }
-    
-    public boolean visit(SQLHexExpr x) {
-        return SQLEvalVisitorUtils.visit(this, x);
-    }
 
     @Override
     public boolean visit(SQLCaseExpr x) {
@@ -138,22 +131,6 @@ public class SQLEvalVisitorImpl extends SQLASTVisitorAdapter implements SQLEvalV
     }
     
     public boolean visit(SQLIdentifierExpr x) {
-        return SQLEvalVisitorUtils.visit(this, x);
-    }
-
-    @Override
-    public void unregisterFunction(String funcName) {
-        functions.remove(funcName);
-    }
-    
-    @Override
-    public boolean visit(SQLBooleanExpr x) {
-        x.getAttributes().put(EVAL_VALUE, x.getValue());
-        return false;
-    }
-
-    @Override
-    public boolean visit(SQLBinaryExpr x) {
         return SQLEvalVisitorUtils.visit(this, x);
     }
 }

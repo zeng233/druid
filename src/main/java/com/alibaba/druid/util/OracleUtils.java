@@ -134,9 +134,10 @@ public class OracleUtils {
         oracleConn.setStatementCacheSize(size);
     }
 
+    @SuppressWarnings("deprecation")
     public static int pingDatabase(Connection conn) throws SQLException {
         OracleConnection oracleConn = unwrap(conn);
-        return oracleConn.pingDatabase();
+        return oracleConn.pingDatabase(1000);
     }
 
     public static void openProxySession(Connection conn, int type, java.util.Properties prop) throws SQLException {

@@ -28,7 +28,7 @@ import com.alibaba.druid.util.DruidPasswordCallback;
 public class PasswordCallbackTest extends TestCase {
 
     protected void setUp() throws Exception {
-        DruidDataSourceStatManager.clear();
+        DruidDataSourceStatManager.cear();
     }
 
     protected void tearDown() throws Exception {

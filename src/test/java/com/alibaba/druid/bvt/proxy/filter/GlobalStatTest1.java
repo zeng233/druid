@@ -25,12 +25,12 @@ public class GlobalStatTest1 extends TestCase {
         dataSourceA = new DruidDataSource();
         dataSourceA.setUrl("jdbc:mock:xx_A");
         dataSourceA.setFilters("stat");
-        dataSourceA.setUseGlobalDataSourceStat(true);
+        dataSourceA.setUseGloalDataSourceStat(true);
 
         dataSourceB = new DruidDataSource();
         dataSourceB.setUrl("jdbc:mock:xx_A");
         dataSourceB.setFilters("stat");
-        dataSourceB.setUseGlobalDataSourceStat(true);
+        dataSourceB.setUseGloalDataSourceStat(true);
     }
 
     protected void tearDown() throws Exception {

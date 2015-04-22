@@ -36,7 +36,7 @@ public class WebSessionStatValue {
     long   jdbcRollbackCount;
     long   createTimeMillis;
     long   lastAccessTimeMillis;
-    String remoteAddress;
+    String remoteAddresse;
     String principal;
     String userAgent;
 
@@ -162,12 +162,12 @@ public class WebSessionStatValue {
         this.lastAccessTimeMillis = lastAccessTimeMillis;
     }
 
-    public String getRemoteAddress() {
-        return remoteAddress;
+    public String getRemoteAddresse() {
+        return remoteAddresse;
     }
 
-    public void setRemoteAddress(String remoteAddresses) {
-        this.remoteAddress = remoteAddresses;
+    public void setRemoteAddresse(String remoteAddresses) {
+        this.remoteAddresse = remoteAddresses;
     }
 
     public String getPrincipal() {
@@ -236,7 +236,7 @@ public class WebSessionStatValue {
         data.put("RequestTimeMillisTotal", this.getRequestTimeMillis());
         data.put("CreateTime", this.getCreateTime());
         data.put("LastAccessTime", this.getLastAccessTime());
-        data.put("RemoteAddress", this.getRemoteAddress());
+        data.put("RemoteAddress", this.getRemoteAddresse());
         data.put("Principal", this.getPrincipal());
 
         data.put("JdbcCommitCount", this.getJdbcCommitCount());

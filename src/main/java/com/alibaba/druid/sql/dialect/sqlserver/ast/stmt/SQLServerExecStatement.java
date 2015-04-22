@@ -26,7 +26,6 @@ import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitor;
 
 public class SQLServerExecStatement extends SQLServerObjectImpl implements SQLServerStatement {
 
-    private SQLName       returnStatus;
     private SQLName       moduleName;
     private List<SQLExpr> parameters = new ArrayList<SQLExpr>();
 
@@ -44,18 +43,9 @@ public class SQLServerExecStatement extends SQLServerObjectImpl implements SQLSe
 
     public void accept0(SQLServerASTVisitor visitor) {
         if (visitor.visit(this)) {
-            acceptChild(visitor, this.returnStatus);
             acceptChild(visitor, this.moduleName);
             acceptChild(visitor, this.parameters);
         }
         visitor.endVisit(this);
-    }
-
-    public SQLName getReturnStatus() {
-        return returnStatus;
-    }
-
-    public void setReturnStatus(SQLName returnStatus) {
-        this.returnStatus = returnStatus;
     }
 }

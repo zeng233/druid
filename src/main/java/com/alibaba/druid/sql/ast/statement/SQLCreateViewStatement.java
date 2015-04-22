@@ -36,10 +36,6 @@ public class SQLCreateViewStatement extends SQLStatementImpl implements SQLDDLSt
     public SQLCreateViewStatement(){
 
     }
-    
-    public SQLCreateViewStatement(String dbType){
-        super (dbType);
-    }
 
     public boolean isOrReplace() {
         return orReplace;

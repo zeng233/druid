@@ -25,19 +25,15 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 public class WallSqlStat {
 
     private volatile long                            executeCount;
-    private volatile long                            executeErrorCount;
     private volatile long                            fetchRowCount;
     private volatile long                            updateCount;
 
-    final static AtomicLongFieldUpdater<WallSqlStat> executeCountUpdater      = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
-                                                                                                                  "executeCount");
-    final static AtomicLongFieldUpdater<WallSqlStat> executeErrorCountUpdater = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
-                                                                                                                  "executeErrorCount");
-
-    final static AtomicLongFieldUpdater<WallSqlStat> fetchRowCountUpdater     = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
-                                                                                                                  "fetchRowCount");
-    final static AtomicLongFieldUpdater<WallSqlStat> updateCountUpdater       = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
-                                                                                                                  "updateCount");
+    final static AtomicLongFieldUpdater<WallSqlStat> executeCountUpdater  = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
+                                                                                                              "executeCount");
+    final static AtomicLongFieldUpdater<WallSqlStat> fetchRowCountUpdater = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
+                                                                                                              "fetchRowCount");
+    final static AtomicLongFieldUpdater<WallSqlStat> updateCountUpdater   = AtomicLongFieldUpdater.newUpdater(WallSqlStat.class,
+                                                                                                              "updateCount");
     private final Map<String, WallSqlTableStat>      tableStats;
 
     private final List<Violation>                    violations;
@@ -83,16 +79,12 @@ public class WallSqlStat {
         return executeCountUpdater.incrementAndGet(this);
     }
 
-    public long incrementAndGetExecuteErrorCount() {
-        return executeErrorCountUpdater.incrementAndGet(this);
-    }
-
     public long getExecuteCount() {
         return executeCount;
     }
 
-    public long getExecuteErrorCount() {
-        return executeErrorCount;
+    public long incrementAndGetFetchRowCount() {
+        return fetchRowCountUpdater.incrementAndGet(this);
     }
 
     public long addAndFetchRowCount(long delta) {
@@ -131,7 +123,6 @@ public class WallSqlStat {
         final WallSqlStatValue statValue = new WallSqlStatValue();
 
         statValue.setExecuteCount(get(this, executeCountUpdater, reset));
-        statValue.setExecuteErrorCount(get(this, executeErrorCountUpdater, reset));
         statValue.setFetchRowCount(get(this, fetchRowCountUpdater, reset));
         statValue.setUpdateCount(get(this, updateCountUpdater, reset));
         statValue.setSyntaxError(this.syntaxError);

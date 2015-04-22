@@ -33,10 +33,6 @@ public class SQLUpdateStatement extends SQLStatementImpl {
     public SQLUpdateStatement(){
 
     }
-    
-    public SQLUpdateStatement(String dbType){
-        super (dbType);
-    }
 
     public SQLTableSource getTableSource() {
         return tableSource;

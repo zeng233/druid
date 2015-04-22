@@ -29,7 +29,7 @@ public class TestActiveTrace extends TestCase {
     private DruidDataSource dataSource;
 
     protected void setUp() throws Exception {
-        DruidDataSourceStatManager.clear();
+        DruidDataSourceStatManager.cear();
 
         dataSource = new DruidDataSource();
         dataSource.setRemoveAbandoned(true);

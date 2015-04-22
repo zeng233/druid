@@ -29,7 +29,7 @@ public abstract class ConnectionBase implements Connection {
     private int                   transactionIsolation;
     private int                   holdability;
     private Map<String, Class<?>> typeMap    = new HashMap<String, Class<?>>();
-    private SQLWarning            warnings;
+    private SQLWarning            warings;
     private boolean               readOnly;
 
     private String                url;
@@ -86,16 +86,16 @@ public abstract class ConnectionBase implements Connection {
 
     @Override
     public SQLWarning getWarnings() throws SQLException {
-        return warnings;
+        return warings;
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-        this.warnings = null;
+        this.warings = null;
     }
 
-    public void setWarnings(SQLWarning warnings) {
-        this.warnings = warnings;
+    public void setWarings(SQLWarning warings) {
+        this.warings = warings;
     }
 
     @Override

@@ -15,11 +15,11 @@
  */
 package com.alibaba.druid.pool.vendor;
 
-import com.alibaba.druid.mock.MockConnectionClosedException;
-import com.alibaba.druid.pool.ExceptionSorter;
-
 import java.sql.SQLException;
 import java.util.Properties;
+
+import com.alibaba.druid.mock.MockConnectionClosedException;
+import com.alibaba.druid.pool.ExceptionSorter;
 
 public class MockExceptionSorter implements ExceptionSorter {
 
@@ -31,7 +31,10 @@ public class MockExceptionSorter implements ExceptionSorter {
 
     @Override
     public boolean isExceptionFatal(SQLException e) {
-        return e instanceof MockConnectionClosedException;
+        if (e instanceof MockConnectionClosedException) {
+            return true;
+        }
+        return false;
     }
 
     public void configFromProperties(Properties properties) {

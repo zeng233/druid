@@ -15,12 +15,9 @@
  */
 package com.alibaba.druid.support.http.stat;
 
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
-import com.alibaba.druid.util.LRUCache;
+import static com.alibaba.druid.util.JdbcSqlStatUtils.get;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +28,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.alibaba.druid.util.JdbcSqlStatUtils.get;
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
+import com.alibaba.druid.util.LRUCache;
 
 public class WebAppStat {
 
@@ -246,6 +245,8 @@ public class WebAppStat {
             if (running > max) {
                 if (concurrentMax.compareAndSet(max, running)) {
                     break;
+                } else {
+                    continue;
                 }
             } else {
                 break;
@@ -280,8 +281,10 @@ public class WebAppStat {
             return null;
         }
 
-        uriStatMap.putIfAbsent(uri, new WebURIStat(uri));
-        uriStat = uriStatMap.get(uri);
+        if (uriStat == null) {
+            uriStatMap.putIfAbsent(uri, new WebURIStat(uri));
+            uriStat = uriStatMap.get(uri);
+        }
 
         return uriStat;
     }
@@ -501,7 +504,7 @@ public class WebAppStat {
 
     public List<Map<String, Object>> getSessionStatDataList() {
         List<Map<String, Object>> sessionStatDataList = new ArrayList<Map<String, Object>>(this.sessionStatMap.size());
-        for (WebSessionStat sessionStat : Collections.unmodifiableCollection(this.sessionStatMap.values())) {
+        for (WebSessionStat sessionStat : this.sessionStatMap.values()) {
             Map<String, Object> sessionStatData = sessionStat.getStatData();
 
             int runningCount = ((Number) sessionStatData.get("RunningCount")).intValue();
@@ -588,7 +591,7 @@ public class WebAppStat {
 
             computeUserAgentIEWindowsVersion(userAgent);
 
-            if (userAgent.contains("Windows Phone")) {
+            if (userAgent.indexOf("Windows Phone") != -1) {
                 deviceWindowsPhoneCount.incrementAndGet();
             }
 
@@ -626,36 +629,37 @@ public class WebAppStat {
 
             osWindowsCount.incrementAndGet();
 
-            if (userAgent.contains("Windows Phone")) {
+            if (userAgent.indexOf("Windows Phone") != -1) {
                 deviceWindowsPhoneCount.incrementAndGet();
             }
         } else if (isMac) {
             isMac = true;
             osMacOSXCount.incrementAndGet();
-            if (isIpad && userAgent.contains("iPad")) {
+            if (isIpad && userAgent.indexOf("iPad") != -1) {
                 deviceIpadCount.incrementAndGet();
-            } else if (isIPhone || userAgent.contains("iPhone")) {
+            } else if (isIPhone || userAgent.indexOf("iPhone") != -1) {
                 deviceIphoneCount.incrementAndGet();
             }
         } else if (isLinux) {
             osLinuxCount.incrementAndGet();
+
             isAndroid = computeUserAgentAndroid(userAgent);
-        } else if (userAgent.contains("Symbian")) {
+        } else if (userAgent.indexOf("Symbian") != -1) {
             osSymbianCount.incrementAndGet();
-        } else if (userAgent.contains("Ubuntu")) {
+        } else if (userAgent.indexOf("Ubuntu") != -1) {
             osLinuxCount.incrementAndGet();
             osLinuxUbuntuCount.incrementAndGet();
             isLinux = true;
         }
 
         if (isX11) {
-            if (userAgent.contains("OpenBSD")) {
+            if (userAgent.indexOf("OpenBSD") != -1) {
                 osOpenBSDCount.incrementAndGet();
                 isBSD = true;
-            } else if (userAgent.contains("FreeBSD")) {
+            } else if (userAgent.indexOf("FreeBSD") != -1) {
                 osFreeBSDCount.incrementAndGet();
                 isBSD = true;
-            } else if ((!isLinux) && userAgent.contains("Linux")) {
+            } else if ((!isLinux) && userAgent.indexOf("Linux") != -1) {
                 osLinuxCount.incrementAndGet();
                 isLinux = true;
             }
@@ -664,11 +668,11 @@ public class WebAppStat {
         boolean isOpera = userAgent.startsWith("Opera");
 
         if (isOpera) {
-            if (userAgent.contains("Windows")) {
+            if (userAgent.indexOf("Windows") != -1) {
                 osWindowsCount.incrementAndGet();
-            } else if (userAgent.contains("Linux")) {
+            } else if (userAgent.indexOf("Linux") != -1) {
                 osWindowsCount.incrementAndGet();
-            } else if (userAgent.contains("Macintosh")) {
+            } else if (userAgent.indexOf("Macintosh") != -1) {
                 osMacOSXCount.incrementAndGet();
             }
             browserOperaCount.incrementAndGet();
@@ -680,17 +684,17 @@ public class WebAppStat {
         }
 
         if (isWindows || isMac || isLinux || isBSD) {
-            if (userAgent.contains("Chrome")) {
+            if (userAgent.indexOf("Chrome") != -1) {
                 browserChromeCount.incrementAndGet();
                 return;
             }
 
-            if ((!isAndroid) && userAgent.contains("Safari")) {
+            if ((!isAndroid) && userAgent.indexOf("Safari") != -1) {
                 browserSafariCount.incrementAndGet();
                 return;
             }
 
-            if (userAgent.contains("Firefox")) {
+            if (userAgent.indexOf("Firefox") != -1) {
                 browserFirefoxCount.incrementAndGet();
                 return;
             }
@@ -782,11 +786,11 @@ public class WebAppStat {
             botCount.incrementAndGet();
         } else if (userAgent.equals("-")) {
             botCount.incrementAndGet();
-        } else if (userAgent.contains("Spider") || userAgent.contains("spider")) {
+        } else if (userAgent.indexOf("Spider") != -1 || userAgent.indexOf("spider") != -1) {
             botCount.incrementAndGet();
-        } else if (userAgent.contains("crawl") || userAgent.contains("Crawl")) {
+        } else if (userAgent.indexOf("crawl") != -1 || userAgent.indexOf("Crawl") != -1) {
             botCount.incrementAndGet();
-        } else if (userAgent.contains("Bot") || userAgent.contains("bot")) {
+        } else if (userAgent.indexOf("Bot") != -1 || userAgent.indexOf("bot") != -1) {
             botCount.incrementAndGet();
         }
 

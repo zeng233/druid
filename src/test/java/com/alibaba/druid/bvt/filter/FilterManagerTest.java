@@ -13,17 +13,6 @@ import com.alibaba.druid.filter.FilterManager;
 
 public class FilterManagerTest extends TestCase {
 
-	static {
-		ClassLoader current = Thread.currentThread().getContextClassLoader();
-		try {
-			Thread.currentThread().setContextClassLoader(null);
-			
-			Assert.assertNotNull(FilterManager.getFilter("stat"));
-		} finally {
-			Thread.currentThread().setContextClassLoader(current);
-		}
-	}
-	
     public void test_instance() throws Exception {
         new FilterManager();
     }
@@ -49,7 +38,6 @@ public class FilterManagerTest extends TestCase {
         }
         Assert.assertNotNull(error);
     }
-    
 
     public static class ErrorFilter extends FilterAdapter {
 

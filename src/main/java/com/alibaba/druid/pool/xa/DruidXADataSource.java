@@ -15,6 +15,13 @@
  */
 package com.alibaba.druid.pool.xa;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
+import javax.transaction.xa.XAException;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.druid.support.logging.Log;
@@ -24,12 +31,6 @@ import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.OracleUtils;
 import com.alibaba.druid.util.PGUtils;
-
-import javax.sql.XAConnection;
-import javax.sql.XADataSource;
-import javax.transaction.xa.XAException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class DruidXADataSource extends DruidDataSource implements XADataSource {
 
@@ -45,7 +46,7 @@ public class DruidXADataSource extends DruidDataSource implements XADataSource {
 
         Connection physicalConn = conn.unwrap(Connection.class);
 
-        XAConnection rawXAConnection = createPhysicalXAConnection(physicalConn);
+        XAConnection rawXAConnection = createPhysicalXAConnetion(physicalConn);
 
         return new DruidPooledXAConnection(conn, rawXAConnection);
     }
@@ -58,7 +59,7 @@ public class DruidXADataSource extends DruidDataSource implements XADataSource {
         }
     }
 
-    private XAConnection createPhysicalXAConnection(Connection physicalConn) throws SQLException {
+    private XAConnection createPhysicalXAConnetion(Connection physicalConn) throws SQLException {
         if (JdbcUtils.ORACLE.equals(dbType)) {
             try {
                 return OracleUtils.OracleXAConnection(physicalConn);

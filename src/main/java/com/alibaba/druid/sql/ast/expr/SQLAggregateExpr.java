@@ -21,7 +21,6 @@ import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLExprImpl;
-import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLOver;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
@@ -29,17 +28,16 @@ public class SQLAggregateExpr extends SQLExprImpl implements Serializable {
 
     private static final long     serialVersionUID = 1L;
     protected String              methodName;
-    protected SQLAggregateOption  option;
+    protected Option              option;
     protected final List<SQLExpr> arguments        = new ArrayList<SQLExpr>();
     protected SQLOver             over;
-    protected SQLOrderBy          withinGroup;
-    protected boolean             ignoreNulls      = false;
 
     public SQLAggregateExpr(String methodName){
+
         this.methodName = methodName;
     }
 
-    public SQLAggregateExpr(String methodName, SQLAggregateOption option){
+    public SQLAggregateExpr(String methodName, Option option){
         this.methodName = methodName;
         this.option = option;
     }
@@ -52,23 +50,11 @@ public class SQLAggregateExpr extends SQLExprImpl implements Serializable {
         this.methodName = methodName;
     }
 
-    public SQLOrderBy getWithinGroup() {
-        return withinGroup;
-    }
-
-    public void setWithinGroup(SQLOrderBy withinGroup) {
-        if (withinGroup != null) {
-            withinGroup.setParent(this);
-        }
-
-        this.withinGroup = withinGroup;
-    }
-
-    public SQLAggregateOption getOption() {
+    public Option getOption() {
         return this.option;
     }
 
-    public void setOption(SQLAggregateOption option) {
+    public void setOption(Option option) {
         this.option = option;
     }
 
@@ -83,15 +69,6 @@ public class SQLAggregateExpr extends SQLExprImpl implements Serializable {
     public void setOver(SQLOver over) {
         this.over = over;
     }
-    
-    public boolean isIgnoreNulls() {
-        return this.ignoreNulls;
-    }
-
-    public void setIgnoreNulls(boolean ignoreNulls) {
-        this.ignoreNulls = ignoreNulls;
-    }
-
 
     @Override
     protected void accept0(SQLASTVisitor visitor) {
@@ -153,4 +130,7 @@ public class SQLAggregateExpr extends SQLExprImpl implements Serializable {
         return true;
     }
 
+    public static enum Option {
+        DISTINCT, ALL, UNIQUE
+    }
 }

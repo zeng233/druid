@@ -23,13 +23,12 @@ import com.alibaba.druid.sql.ast.SQLObject;
 import com.alibaba.druid.sql.ast.SQLSetQuantifier;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAllColumnExpr;
-import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLLiteralExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableItem;
-import com.alibaba.druid.sql.ast.statement.SQLCharacterDataType;
+import com.alibaba.druid.sql.ast.statement.SQLCharactorDataType;
 import com.alibaba.druid.sql.ast.statement.SQLCheck;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
 import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
@@ -73,6 +72,7 @@ import com.alibaba.druid.sql.dialect.oracle.ast.clause.OracleWithSubqueryEntry;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.PartitionExtensionClause;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.SampleClause;
 import com.alibaba.druid.sql.dialect.oracle.ast.clause.SearchClause;
+import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAggregateExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAnalytic;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleAnalyticWindowing;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
@@ -89,6 +89,7 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleOuterExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleRangeExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSizeExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSysdateExpr;
+import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleTimestampExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterIndexStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterIndexStatement.Rebuild;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterProcedureStatement;
@@ -98,6 +99,7 @@ import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableAddConstain
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableDropPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableModify;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableMoveTablespace;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableRenameTo;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableSplitPartition;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableSplitPartition.NestedTablePartitionSpec;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleAlterTableSplitPartition.TableSpaceItem;
@@ -216,14 +218,32 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
         }
     }
 
+    public boolean visit(OracleAggregateExpr expr) {
+        print(expr.getMethodName());
+        print("(");
+
+        if (expr.getOption() != null) {
+            print(expr.getOption().toString());
+            print(' ');
+        }
+
+        printAndAccept(expr.getArguments(), ", ");
+        print(")");
+
+        if (expr.getOver() != null) {
+            print(" OVER (");
+            expr.getOver().accept(this);
+            print(")");
+        }
+        return false;
+    }
+
     public boolean visit(SQLAllColumnExpr x) {
         print("*");
         return false;
     }
 
     public boolean visit(OracleAnalytic x) {
-        print("OVER (");
-        
         boolean space = false;
         if (x.getPartitionBy().size() > 0) {
             print("PARTITION BY ");
@@ -247,8 +267,6 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
             x.getWindowing().accept(this);
         }
 
-        print(")");
-        
         return false;
     }
 
@@ -276,11 +294,7 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
     public boolean visit(OracleDeleteStatement x) {
         if (x.getTableName() != null) {
             print("DELETE ");
-            
-            if (x.getHints().size() > 0) {
-                printAndAccept(x.getHints(), ", ");
-                print(' ');
-            }
+            printHints(x.getHints());
 
             print("FROM ");
             if (x.isOnly()) {
@@ -739,13 +753,24 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
         return false;
     }
 
+    public boolean visit(OracleTimestampExpr x) {
+        print("TIMESTAMP '");
+
+        print(x.getLiteral());
+        print('\'');
+
+        if (x.getTimeZone() != null) {
+            print(" AT TIME ZONE '");
+            print(x.getTimeZone());
+            print('\'');
+        }
+
+        return false;
+    }
+
     public boolean visit(OracleUpdateStatement x) {
         print("UPDATE ");
-        
-        if (x.getHints().size() > 0) {
-            printAndAccept(x.getHints(), ", ");
-            print(' ');
-        }
+        printHints(x.getHints());
 
         if (x.isOnly()) {
             print("ONLY (");
@@ -783,6 +808,13 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
         }
 
         return false;
+    }
+
+    // ///////////////////
+
+    @Override
+    public void endVisit(OracleAggregateExpr astNode) {
+
     }
 
     @Override
@@ -890,6 +922,10 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
 
     }
 
+    @Override
+    public void endVisit(OracleTimestampExpr x) {
+
+    }
 
     @Override
     public void endVisit(OracleUpdateStatement x) {
@@ -1344,9 +1380,8 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
         print("USING ");
         x.getUsing().accept(this);
 
-        print(" ON (");
+        print(" ON ");
         x.getOn().accept(this);
-        print(") ");
 
         if (x.getUpdateClause() != null) {
             println();
@@ -1473,48 +1508,7 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
 
     @Override
     public boolean visit(OracleInsertStatement x) {
-        //visit((SQLInsertStatement) x);
-        
-        print("INSERT ");
-        
-        if (x.getHints().size() > 0) {
-            printAndAccept(x.getHints(), ", ");
-            print(' ');
-        }
-
-        print("INTO ");
-        
-        x.getTableSource().accept(this);
-
-        if (x.getColumns().size() > 0) {
-            incrementIndent();
-            println();
-            print("(");
-            for (int i = 0, size = x.getColumns().size(); i < size; ++i) {
-                if (i != 0) {
-                    if (i % 5 == 0) {
-                        println();
-                    }
-                    print(", ");
-                }
-                x.getColumns().get(i).accept(this);
-            }
-            print(")");
-            decrementIndent();
-        }
-
-        if (x.getValues() != null) {
-            println();
-            print("VALUES");
-            println();
-            x.getValues().accept(this);
-        } else {
-            if (x.getQuery() != null) {
-                println();
-                x.getQuery().setParent(x);
-                x.getQuery().accept(this);
-            }
-        }
+        visit((SQLInsertStatement) x);
 
         if (x.getReturning() != null) {
             println();
@@ -2210,7 +2204,6 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
             item.setParent(x);
             item.accept(this);
         }
-        print(";");
 
         decrementIndent();
         return false;
@@ -2232,7 +2225,6 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
             item.setParent(x);
             item.accept(this);
         }
-        print(";");
 
         decrementIndent();
         return false;
@@ -2263,7 +2255,6 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
                 println();
             }
         }
-        print(";");
         decrementIndent();
 
         for (ElseIf elseIf : x.getElseIfList()) {
@@ -2485,6 +2476,18 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
 
     @Override
     public void endVisit(OracleCreateTableStatement x) {
+
+    }
+
+    @Override
+    public boolean visit(OracleAlterTableRenameTo x) {
+        print("RENAME TO ");
+        x.getTo().accept(this);
+        return false;
+    }
+
+    @Override
+    public void endVisit(OracleAlterTableRenameTo x) {
 
     }
 
@@ -3109,7 +3112,7 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
 
     }
 
-    public boolean visit(SQLCharacterDataType x) {
+    public boolean visit(SQLCharactorDataType x) {
         print(x.getName());
         if (x.getArguments().size() > 0) {
             print("(");
@@ -3379,40 +3382,5 @@ public class OracleOutputVisitor extends SQLASTOutputVisitor implements OracleAS
     @Override
     protected void printCascade() {
         print(" CASCADE CONSTRAINTS");
-    }
-
-    @Override
-    public boolean visit(SQLMethodInvokeExpr x) {
-        if ("trim".equalsIgnoreCase(x.getMethodName())) {
-            SQLExpr trim_character = (SQLExpr) x.getAttribute("trim_character");
-            if (trim_character != null) {
-                print(x.getMethodName());
-                print("(");
-                String trim_option = (String) x.getAttribute("trim_option");
-                if (trim_option != null && trim_option.length() != 0) {
-                    print(trim_option);
-                    print(' ');
-                }
-                trim_character.accept(this);
-                if (x.getParameters().size() > 0) {
-                    print(" FROM ");
-                    x.getParameters().get(0).accept(this);
-                }
-                print(")");
-                return false;
-            }
-        }
-
-        return super.visit(x);
-    }
-    
-    public boolean visit(SQLCharExpr x) {
-        if (x.getText() != null && x.getText().length() == 0) {
-            print("NULL");
-        } else {
-            super.visit(x);
-        }
-
-        return false;
     }
 }

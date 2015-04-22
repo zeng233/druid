@@ -24,9 +24,7 @@ public enum SQLUnaryOperator {
     ConnectByRoot("CONNECT BY"), //
     BINARY("BINARY"), //
     RAW("RAW"), //
-    NOT("NOT"),
-    Pound("#") // Number of points in path or polygon
-    ;
+    NOT("NOT");
 
     public final String name;
 

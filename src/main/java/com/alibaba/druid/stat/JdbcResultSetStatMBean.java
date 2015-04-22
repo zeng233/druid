@@ -28,9 +28,9 @@ public interface JdbcResultSetStatMBean {
 
     long getCloseCount();
 
-    int getOpeningCount();
+    int getOpenningCount();
 
-    int getOpeningMax();
+    int getOpenningMax();
 
     long getErrorCount();
 }

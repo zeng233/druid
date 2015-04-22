@@ -321,7 +321,9 @@ public class StatementProxyImpl extends WrapperProxyImpl implements StatementPro
     public boolean getMoreResults() throws SQLException {
         FilterChainImpl chain = createChain();
         boolean value = chain.statement_getMoreResults(this);
-        updateCount = null;
+        if (value) {
+            updateCount = null;
+        }
         recycleFilterChain(chain);
         return value;
     }

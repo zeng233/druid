@@ -19,10 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.SQLObjectImpl;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
-public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery {
+public class SQLSelectQueryBlock extends SQLSelectQuery {
 
     protected int                       distionOption;
     protected final List<SQLSelectItem> selectList = new ArrayList<SQLSelectItem>();
@@ -31,7 +30,6 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
     protected SQLExprTableSource        into;
     protected SQLExpr                   where;
     protected SQLSelectGroupByClause    groupBy;
-    protected boolean parenthesized = false;
 
     public SQLSelectQueryBlock(){
 
@@ -91,15 +89,7 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
         this.from = from;
     }
 
-    public boolean isParenthesized() {
-		return parenthesized;
-	}
-
-	public void setParenthesized(boolean parenthesized) {
-		this.parenthesized = parenthesized;
-	}
-
-	@Override
+    @Override
     protected void accept0(SQLASTVisitor visitor) {
         if (visitor.visit(this)) {
             acceptChild(visitor, this.selectList);
@@ -114,7 +104,6 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (Boolean.valueOf(parenthesized).hashCode());
         result = prime * result + distionOption;
         result = prime * result + ((from == null) ? 0 : from.hashCode());
         result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
@@ -130,7 +119,6 @@ public class SQLSelectQueryBlock extends SQLObjectImpl implements SQLSelectQuery
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         SQLSelectQueryBlock other = (SQLSelectQueryBlock) obj;
-        if (parenthesized ^ other.parenthesized) return false;
         if (distionOption != other.distionOption) return false;
         if (from == null) {
             if (other.from != null) return false;

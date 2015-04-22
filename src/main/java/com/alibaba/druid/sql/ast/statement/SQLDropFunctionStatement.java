@@ -23,14 +23,6 @@ public class SQLDropFunctionStatement extends SQLStatementImpl implements SQLDDL
 
     private SQLName name;
     private boolean ifExists;
-    
-    public SQLDropFunctionStatement() {
-        
-    }
-    
-    public SQLDropFunctionStatement(String dbType) {
-        super (dbType);
-    }
 
     @Override
     protected void accept0(SQLASTVisitor visitor) {

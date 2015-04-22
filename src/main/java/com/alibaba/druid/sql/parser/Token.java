@@ -73,7 +73,6 @@ public enum Token {
    
     ALL("ALL"), 
     UNION("UNION"), 
-    EXCEPT("EXCEPT"), 
     INTERSECT("INTERSECT"), 
     MINUS("MINUS"),
     INNER("INNER"), 
@@ -177,7 +176,6 @@ public enum Token {
     DECLARE("DECLARE"),
     EXCEPTION("EXCEPTION"),
     GRANT("GRANT"),
-    REVOKE("REVOKE"),
     LOOP("LOOP"),
     GOTO("GOTO"),
     COMMIT("COMMIT"),
@@ -221,8 +219,6 @@ public enum Token {
     // transact-sql
     TOP("TOP"),
     
-    ARRAY("ARRAY"),
-    
     // hive
 
     EOF, 
@@ -243,11 +239,6 @@ public enum Token {
     // Oracle
     BINARY_FLOAT,
     BINARY_DOUBLE,
-    
-    // odps,hive
-    PARTITION,
-    PARTITIONED,
-    OVERWRITE,
 
     LPAREN("("), 
     RPAREN(")"), 
@@ -264,7 +255,6 @@ public enum Token {
     GT(">"), 
     LT("<"), 
     BANG("!"),
-    BANGBANG("!!"),
     TILDE("~"), 
     QUES("?"), 
     COLON(":"), 
@@ -280,8 +270,6 @@ public enum Token {
     BANGLT("!<"),
     AMPAMP("&&"), 
     BARBAR("||"), 
-    BARBARSLASH("||/"), 
-    BARSLASH("|/"), 
     PLUS("+"), 
     SUB("-"), 
     STAR("*"), 
@@ -292,9 +280,7 @@ public enum Token {
     PERCENT("%"), 
     LTLT("<<"), 
     GTGT(">>"),
-    MONKEYS_AT("@"),
-    POUND("#")
-    ;
+    MONKEYS_AT("@");
 
     public final String name;
 

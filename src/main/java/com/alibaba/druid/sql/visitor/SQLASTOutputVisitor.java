@@ -39,10 +39,8 @@ import com.alibaba.druid.sql.ast.expr.SQLAllColumnExpr;
 import com.alibaba.druid.sql.ast.expr.SQLAllExpr;
 import com.alibaba.druid.sql.ast.expr.SQLAnyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
-import com.alibaba.druid.sql.ast.expr.SQLBooleanExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCastExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
@@ -63,7 +61,6 @@ import com.alibaba.druid.sql.ast.expr.SQLNumberExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLSomeExpr;
-import com.alibaba.druid.sql.ast.expr.SQLTimestampExpr;
 import com.alibaba.druid.sql.ast.expr.SQLUnaryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.NotNullConstraint;
@@ -75,18 +72,17 @@ import com.alibaba.druid.sql.ast.statement.SQLAlterTableDisableConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableDisableKeys;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropColumnItem;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropConstraint;
-import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropForeignKey;
+import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropForeinKey;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropIndex;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableDropPrimaryKey;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableEnableConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableEnableKeys;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableItem;
-import com.alibaba.druid.sql.ast.statement.SQLAlterTableRename;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableRenameColumn;
 import com.alibaba.druid.sql.ast.statement.SQLAlterTableStatement;
 import com.alibaba.druid.sql.ast.statement.SQLAssignItem;
 import com.alibaba.druid.sql.ast.statement.SQLCallStatement;
-import com.alibaba.druid.sql.ast.statement.SQLCharacterDataType;
+import com.alibaba.druid.sql.ast.statement.SQLCharactorDataType;
 import com.alibaba.druid.sql.ast.statement.SQLCheck;
 import com.alibaba.druid.sql.ast.statement.SQLColumnCheck;
 import com.alibaba.druid.sql.ast.statement.SQLColumnConstraint;
@@ -101,7 +97,6 @@ import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
 import com.alibaba.druid.sql.ast.statement.SQLCreateTriggerStatement;
 import com.alibaba.druid.sql.ast.statement.SQLCreateTriggerStatement.TriggerEvent;
 import com.alibaba.druid.sql.ast.statement.SQLCreateTriggerStatement.TriggerType;
-import com.alibaba.druid.sql.ast.statement.SQLCreateViewStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDropDatabaseStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDropFunctionStatement;
@@ -126,7 +121,6 @@ import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource.JoinType;
 import com.alibaba.druid.sql.ast.statement.SQLPrimaryKey;
 import com.alibaba.druid.sql.ast.statement.SQLPrimaryKeyImpl;
 import com.alibaba.druid.sql.ast.statement.SQLReleaseSavePointStatement;
-import com.alibaba.druid.sql.ast.statement.SQLRevokeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLRollbackStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSavePointStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
@@ -140,7 +134,6 @@ import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableElement;
 import com.alibaba.druid.sql.ast.statement.SQLTruncateStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
-import com.alibaba.druid.sql.ast.statement.SQLUnionQueryTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUnique;
 import com.alibaba.druid.sql.ast.statement.SQLUniqueConstraint;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
@@ -151,10 +144,9 @@ import com.alibaba.druid.sql.ast.statement.SQLWithSubqueryClause;
 public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements PrintableVisitor {
 
     protected final Appendable appender;
-    private String             indent                 = "\t";
-    private int                indentCount            = 0;
-    private boolean            prettyFormat           = true;
-    protected int              selectListNumberOfLine = 5;
+    private String             indent       = "\t";
+    private int                indentCount  = 0;
+    private boolean            prettyFormat = true;
 
     private List<Object>       parameters;
 
@@ -260,7 +252,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         incrementIndent();
         for (int i = 0, size = selectList.size(); i < size; ++i) {
             if (i != 0) {
-                if (i % selectListNumberOfLine == 0) {
+                if (i % 5 == 0) {
                     println();
                 }
 
@@ -454,7 +446,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     }
 
     public boolean visit(SQLCharExpr x) {
-        if (x.getText() == null) {
+        if ((x.getText() == null) || (x.getText().length() == 0)) {
             print("NULL");
         } else {
             print("'");
@@ -476,7 +468,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         return false;
     }
 
-    public boolean visit(SQLCharacterDataType x) {
+    public boolean visit(SQLCharactorDataType x) {
         visit((SQLDataType) x);
         return false;
     }
@@ -544,12 +536,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
 
         print(")");
 
-        if (x.getWithinGroup() != null) {
-            print(" WITHIN GROUP (");
-            x.getWithinGroup().accept(this);
-            print(")");
-        }
-
         if (x.getOver() != null) {
             print(" ");
             x.getOver().accept(this);
@@ -579,23 +565,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
 
     public boolean visit(SQLNotExpr x) {
         print("NOT ");
-        SQLExpr expr = x.getExpr();
-
-        boolean needQuote = false;
-
-        if (expr instanceof SQLBinaryOpExpr) {
-            SQLBinaryOpExpr binaryOpExpr = (SQLBinaryOpExpr) expr;
-            needQuote = binaryOpExpr.getOperator().isLogical();
-        }
-
-        if (needQuote) {
-            print('(');
-        }
-        expr.accept(this);
-
-        if (needQuote) {
-            print(')');
-        }
+        x.getExpr().accept(this);
         return false;
     }
 
@@ -630,9 +600,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             decrementIndent();
         } else if (parent instanceof ValuesClause) {
             println();
-            print("(");
             x.getSubQuery().accept(this);
-            print(")");
             println();
         } else {
             print("(");
@@ -675,10 +643,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             x.getOrderBy().accept(this);
         }
 
-        if (x.getHintsSize() > 0) {
-            printAndAccept(x.getHints(), "");
-        }
-
         return false;
     }
 
@@ -717,9 +681,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     }
 
     public boolean visit(SQLSelectItem x) {
-        if (x.isConnectByRoot()) {
-            print("CONNECT_BY_ROOT ");
-        }
         x.getExpr().accept(this);
 
         if ((x.getAlias() != null) && (x.getAlias().length() > 0)) {
@@ -903,7 +864,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             visitColumnDefault(x);
         }
 
-        for (SQLColumnConstraint item : x.getConstraints()) {
+        for (SQLColumnConstraint item : x.getConstaints()) {
             boolean newLine = item instanceof SQLForeignKeyConstraint //
                               || item instanceof SQLPrimaryKey //
                               || item instanceof SQLColumnCheck //
@@ -927,11 +888,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             if (x.getEnable().booleanValue()) {
                 print(" ENABLE");
             }
-        }
-
-        if (x.getComment() != null) {
-            print(" COMMENT ");
-            x.getComment().accept(this);
         }
 
         return false;
@@ -1058,12 +1014,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             println();
             print(")");
         }
-        
-        if (x.getInherits() != null) {
-            print(" INHERITS (");
-            x.getInherits().accept(this);
-            print(")");
-        }
 
         return false;
     }
@@ -1174,12 +1124,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     public boolean visit(SQLSetStatement x) {
         print("SET ");
         printAndAccept(x.getItems(), ", ");
-
-        if (x.getHints() != null && x.getHints().size() > 0) {
-            print(" ");
-            printAndAccept(x.getHints(), " ");
-        }
-
         return false;
     }
 
@@ -1193,23 +1137,11 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
 
     @Override
     public boolean visit(SQLCallStatement x) {
-        if (x.isBrace()) {
-            print("{");
-        }
-        if (x.getOutParameter() != null) {
-            x.getOutParameter().accept(this);
-            print(" = ");
-        }
-
         print("CALL ");
         x.getProcedureName().accept(this);
         print('(');
-
         printAndAccept(x.getParameters(), ", ");
         print(')');
-        if (x.isBrace()) {
-            print("}");
-        }
         return false;
     }
 
@@ -1399,10 +1331,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     public boolean visit(SQLAlterTableDropColumnItem x) {
         print("DROP COLUMN ");
         this.printAndAccept(x.getColumns(), ", ");
-        
-        if (x.isCascade()) {
-            print(" CASCADE");
-        }
         return false;
     }
 
@@ -1463,27 +1391,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     }
 
     @Override
-    public boolean visit(SQLCreateViewStatement x) {
-        print("CREATE ");
-        if (x.isOrReplace()) {
-            print("OR REPLACE ");
-        }
-        print("VIEW ");
-        x.getName().accept(this);
-
-        if (x.getColumns().size() > 0) {
-            print(" (");
-            printAndAccept(x.getColumns(), ", ");
-            print(")");
-        }
-
-        print(" AS ");
-
-        x.getSubQuery().accept(this);
-        return false;
-    }
-
-    @Override
     public boolean visit(SQLAlterTableDropIndex x) {
         print("DROP INDEX ");
         x.getIndexName().accept(this);
@@ -1494,7 +1401,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     public boolean visit(SQLOver x) {
         print("OVER (");
         if (x.getPartitionBy().size() > 0) {
-            print("PARTITION BY ");
             printAndAccept(x.getPartitionBy(), ", ");
             print(' ');
         }
@@ -1588,21 +1494,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     public boolean visit(SQLAlterTableAlterColumn x) {
         print("ALTER COLUMN ");
         x.getColumn().accept(this);
-        
-        if (x.isSetNotNull()) { // postgresql
-            print(" SET NOT NULL");
-        }
-        if (x.isDropNotNull()) { // postgresql
-            print(" DROP NOT NULL");
-        }
-        if (x.getSetDefault() != null) { // postgresql
-            print(" SET DEFAULT ");
-            x.getSetDefault().accept(this);
-        }
-        if (x.isDropDefault()) { // postgresql
-            print(" DROP DEFAULT");
-        }
-        
         return false;
     }
 
@@ -1622,7 +1513,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     }
 
     @Override
-    public boolean visit(SQLAlterTableDropForeignKey x) {
+    public boolean visit(SQLAlterTableDropForeinKey x) {
         print("DROP FOREIGN KEY ");
         x.getIndexName().accept(this);
         return false;
@@ -1767,17 +1658,15 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         }
 
         print("FOREIGN KEY (");
-        printAndAccept(x.getReferencingColumns(), ", ");
+        printAndAccept(x.getReferencedColumns(), ", ");
         print(")");
 
         print(" REFERENCES ");
         x.getReferencedTableName().accept(this);
 
-        if (x.getReferencedColumns().size() > 0) {
-            print(" (");
-            printAndAccept(x.getReferencedColumns(), ", ");
-            print(")");
-        }
+        print(" (");
+        printAndAccept(x.getReferencedColumns(), ", ");
+        print(")");
         return false;
     }
 
@@ -1815,10 +1704,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
     @Override
     public boolean visit(SQLExplainStatement x) {
         print("EXPLAIN");
-        if (x.getHints() != null && x.getHints().size() > 0) {
-            print(" ");
-            printAndAccept(x.getHints(), " ");
-        }
         println();
         x.getStatement().accept(this);
         return false;
@@ -1829,7 +1714,16 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         print("GRANT ");
         printAndAccept(x.getPrivileges(), ", ");
 
-        printGrantOn(x);
+        if (x.getOn() != null) {
+            print(" ON ");
+
+            if (x.getObjectType() != null) {
+                print(x.getObjectType().name());
+                print(' ');
+            }
+
+            x.getOn().accept(this);
+        }
 
         if (x.getTo() != null) {
             print(" TO ");
@@ -1880,47 +1774,10 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             }
             print(" ADMIN OPTION");
         }
-
+        
         if (x.getIdentifiedBy() != null) {
             print(" IDENTIFIED BY ");
             x.getIdentifiedBy().accept(this);
-        }
-
-        return false;
-    }
-
-    protected void printGrantOn(SQLGrantStatement x) {
-        if (x.getOn() != null) {
-            print(" ON ");
-
-            if (x.getObjectType() != null) {
-                print(x.getObjectType().name());
-                print(' ');
-            }
-
-            x.getOn().accept(this);
-        }
-    }
-
-    @Override
-    public boolean visit(SQLRevokeStatement x) {
-        print("ROVOKE ");
-        printAndAccept(x.getPrivileges(), ", ");
-
-        if (x.getOn() != null) {
-            print(" ON ");
-
-            if (x.getObjectType() != null) {
-                print(x.getObjectType().name());
-                print(' ');
-            }
-
-            x.getOn().accept(this);
-        }
-
-        if (x.getFrom() != null) {
-            print(" FROM ");
-            x.getFrom().accept(this);
         }
 
         return false;
@@ -1938,43 +1795,43 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
 
         return false;
     }
-
+    
     @Override
     public boolean visit(SQLDropFunctionStatement x) {
         print("DROP FUNCTION ");
-
+        
         if (x.isIfExists()) {
             print("IF EXISTS ");
         }
-
+        
         x.getName().accept(this);
-
+        
         return false;
     }
-
+    
     @Override
     public boolean visit(SQLDropTableSpaceStatement x) {
         print("DROP TABLESPACE ");
-
+        
         if (x.isIfExists()) {
             print("IF EXISTS ");
         }
-
+        
         x.getName().accept(this);
-
+        
         return false;
     }
-
+    
     @Override
     public boolean visit(SQLDropProcedureStatement x) {
         print("DROP PROCEDURE ");
-
+        
         if (x.isIfExists()) {
             print("IF EXISTS ");
         }
-
+        
         x.getName().accept(this);
-
+        
         return false;
     }
 
@@ -1990,8 +1847,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
             print("UNIQUE ");
         }
 
-        print(x.getKeyOrIndex());
-        print(" ");
+        print("INDEX ");
 
         if (x.getName() != null) {
             x.getName().accept(this);
@@ -2019,18 +1875,18 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         x.getConstraint().accept(this);
         return false;
     }
-
+    
     public boolean visit(SQLCreateTriggerStatement x) {
         print("CREATE ");
-
+        
         if (x.isOrReplace()) {
             print("OR REPLEACE ");
         }
-
+        
         print("TRIGGER ");
-
+        
         x.getName().accept(this);
-
+        
         incrementIndent();
         println();
         if (TriggerType.INSTEAD_OF.equals(x.getTriggerType())) {
@@ -2038,7 +1894,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         } else {
             print(x.getTriggerType().name());
         }
-
+        
         for (TriggerEvent event : x.getTriggerEvents()) {
             print(' ');
             print(event.name());
@@ -2046,7 +1902,7 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         println();
         print("ON ");
         x.getOn().accept(this);
-
+        
         if (x.isForEachRow()) {
             println();
             print("FOR EACH ROW");
@@ -2054,69 +1910,6 @@ public class SQLASTOutputVisitor extends SQLASTVisitorAdapter implements Printab
         decrementIndent();
         println();
         x.getBody().accept(this);
-        return false;
-    }
-
-    public boolean visit(SQLBooleanExpr x) {
-        print(x.getValue() ? "true" : "false");
-
-        return false;
-    }
-
-    public void endVisit(SQLBooleanExpr x) {
-    }
-
-    @Override
-    public boolean visit(SQLUnionQueryTableSource x) {
-        print("(");
-        incrementIndent();
-        x.getUnion().accept(this);
-        println();
-        decrementIndent();
-        print(")");
-
-        if (x.getAlias() != null) {
-            print(' ');
-            print(x.getAlias());
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean visit(SQLTimestampExpr x) {
-        print("TIMESTAMP ");
-
-        if (x.isWithTimeZone()) {
-            print(" WITH TIME ZONE ");
-        }
-
-        print('\'');
-        print(x.getLiteral());
-        print('\'');
-
-        if (x.getTimeZone() != null) {
-            print(" AT TIME ZONE '");
-            print(x.getTimeZone());
-            print('\'');
-        }
-
-        return false;
-    }
-    
-    @Override
-    public boolean visit(SQLBinaryExpr x) {
-        print("b'");
-        print(x.getValue());
-        print('\'');
-
-        return false;
-    }
-    
-    @Override
-    public boolean visit(SQLAlterTableRename x) {
-        print("RENAME TO ");
-        x.getTo().accept(this);
         return false;
     }
 }

@@ -15,26 +15,13 @@
  */
 package com.alibaba.druid.sql.ast.statement;
 
-import java.util.List;
-
-import com.alibaba.druid.sql.ast.SQLCommentHint;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.SQLStatementImpl;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class SQLExplainStatement extends SQLStatementImpl {
 
-    protected SQLStatement       statement;
-
-    private List<SQLCommentHint> hints;
-    
-    public SQLExplainStatement() {
-        
-    }
-    
-    public SQLExplainStatement(String dbType) {
-        super (dbType);
-    }
+    protected SQLStatement statement;
 
     public SQLStatement getStatement() {
         return statement;
@@ -53,13 +40,5 @@ public class SQLExplainStatement extends SQLStatementImpl {
             acceptChild(visitor, statement);
         }
         visitor.endVisit(this);
-    }
-
-    public List<SQLCommentHint> getHints() {
-        return hints;
-    }
-
-    public void setHints(List<SQLCommentHint> hints) {
-        this.hints = hints;
     }
 }

@@ -15,27 +15,28 @@
  */
 package com.alibaba.druid.support.spring.stat;
 
-import com.alibaba.druid.filter.stat.StatFilterContext;
-import com.alibaba.druid.filter.stat.StatFilterContextListenerAdapter;
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.lang.reflect.Method;
+import com.alibaba.druid.filter.stat.StatFilterContext;
+import com.alibaba.druid.filter.stat.StatFilterContextListenerAdapter;
+import com.alibaba.druid.support.logging.Log;
+import com.alibaba.druid.support.logging.LogFactory;
 
 public class DruidStatInterceptor implements MethodInterceptor, InitializingBean, DisposableBean {
 
-    public static final String          PROP_NAME_PROFILE   = "druid.profile";
+    public static final String          PROP_NAME_PORFILE   = "druid.profile";
 
     private final static Log            LOG                 = LogFactory.getLog(DruidStatInterceptor.class);
 
     private static SpringStat           springStat          = new SpringStat();
 
-    private SpringMethodContextListener statContextListener = new SpringMethodContextListener();
+    private SpringMethodContextListener statContextlistener = new SpringMethodContextListener();
 
     public DruidStatInterceptor(){
 
@@ -45,12 +46,12 @@ public class DruidStatInterceptor implements MethodInterceptor, InitializingBean
     public void afterPropertiesSet() throws Exception {
         SpringStatManager.getInstance().addSpringStat(springStat);
 
-        StatFilterContext.getInstance().addContextListener(statContextListener);
+        StatFilterContext.getInstance().addContextListener(statContextlistener);
     }
 
     @Override
     public void destroy() throws Exception {
-        StatFilterContext.getInstance().removeContextListener(statContextListener);
+        StatFilterContext.getInstance().removeContextListener(statContextlistener);
     }
 
     @Override
@@ -69,7 +70,9 @@ public class DruidStatInterceptor implements MethodInterceptor, InitializingBean
 
         Throwable error = null;
         try {
-            return invocation.proceed();
+            Object returnObject = invocation.proceed();
+
+            return returnObject;
         } catch (Throwable e) {
             error = e;
             throw e;

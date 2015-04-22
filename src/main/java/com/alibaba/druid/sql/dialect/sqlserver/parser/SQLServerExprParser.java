@@ -15,25 +15,18 @@
  */
 package com.alibaba.druid.sql.dialect.sqlserver.parser;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerColumnDefinition;
-import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerOutput;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerTop;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.expr.SQLServerObjectReferenceExpr;
 import com.alibaba.druid.sql.parser.Lexer;
 import com.alibaba.druid.sql.parser.SQLExprParser;
 import com.alibaba.druid.sql.parser.Token;
-import com.alibaba.druid.util.JdbcConstants;
 
 public class SQLServerExprParser extends SQLExprParser {
 
@@ -41,14 +34,12 @@ public class SQLServerExprParser extends SQLExprParser {
 
     public SQLServerExprParser(Lexer lexer){
         super(lexer);
-        this.dbType = JdbcConstants.SQL_SERVER;
         this.aggregateFunctions = AGGREGATE_FUNCTIONS;
     }
 
     public SQLServerExprParser(String sql){
         this(new SQLServerLexer(sql));
         this.lexer.nextToken();
-        this.dbType = JdbcConstants.SQL_SERVER;
     }
 
     public SQLExpr primary() {
@@ -141,54 +132,6 @@ public class SQLServerExprParser extends SQLExprParser {
         }
 
         return null;
-    }
-    
-    protected SQLServerOutput parserOutput() {
-        if (identifierEquals("OUTPUT")) {
-            lexer.nextToken();
-            SQLServerOutput output = new SQLServerOutput();
-
-            final List<SQLSelectItem> selectList = output.getSelectList();
-            for (;;) {
-                final SQLSelectItem selectItem = parseSelectItem();
-                selectList.add(selectItem);
-
-                if (lexer.token() != Token.COMMA) {
-                    break;
-                }
-
-                lexer.nextToken();
-            }
-
-            if (lexer.token() == Token.INTO) {
-                lexer.nextToken();
-                output.setInto(new SQLExprTableSource(this.name()));
-                if (lexer.token() == (Token.LPAREN)) {
-                    lexer.nextToken();
-                    this.exprList(output.getColumns(), output);
-                    accept(Token.RPAREN);
-                }
-            }
-            return output;
-        }
-        return null;
-    }
-
-    protected SQLSelectItem parseSelectItem() {
-        SQLExpr expr;
-        if (lexer.token() == Token.IDENTIFIER) {
-            expr = new SQLIdentifierExpr(lexer.stringVal());
-            lexer.nextTokenComma();
-
-            if (lexer.token() != Token.COMMA) {
-                expr = this.primaryRest(expr);
-                expr = this.exprRest(expr);
-            }
-        } else {
-            expr = this.expr();
-        }
-        final String alias = as();
-        return new SQLSelectItem(expr, alias);
     }
 
     protected SQLColumnDefinition createColumnDefinition() {

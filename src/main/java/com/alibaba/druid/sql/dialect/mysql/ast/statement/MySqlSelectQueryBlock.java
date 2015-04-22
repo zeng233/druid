@@ -281,9 +281,6 @@ public class MySqlSelectQueryBlock extends SQLSelectQueryBlock implements MySqlO
         }
 
         public void setRowCount(SQLExpr rowCount) {
-            if (rowCount != null) {
-                rowCount.setParent(this);
-            }
             this.rowCount = rowCount;
         }
 
@@ -292,9 +289,6 @@ public class MySqlSelectQueryBlock extends SQLSelectQueryBlock implements MySqlO
         }
 
         public void setOffset(SQLExpr offset) {
-            if (offset != null) {
-                offset.setParent(this);
-            }
             this.offset = offset;
         }
 

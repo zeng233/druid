@@ -15,14 +15,15 @@
  */
 package com.alibaba.druid.stat;
 
-import com.alibaba.druid.util.Histogram;
-import com.alibaba.druid.util.JMXUtils;
-
-import javax.management.JMException;
-import javax.management.openmbean.CompositeData;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.management.JMException;
+import javax.management.openmbean.CompositeData;
+
+import com.alibaba.druid.util.Histogram;
+import com.alibaba.druid.util.JMXUtils;
 
 public class JdbcStatementStat implements JdbcStatementStatMBean {
 
@@ -89,6 +90,8 @@ public class JdbcStatementStat implements JdbcStatementStatMBean {
             if (invoking > max) {
                 if (concurrentMax.compareAndSet(max, invoking)) {
                     break;
+                } else {
+                    continue;
                 }
             } else {
                 break;

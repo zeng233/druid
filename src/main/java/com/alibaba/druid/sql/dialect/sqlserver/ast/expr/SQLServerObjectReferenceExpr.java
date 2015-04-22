@@ -45,7 +45,7 @@ public class SQLServerObjectReferenceExpr extends SQLServerObjectImpl implements
         }
     }
 
-    public String getSimpleName() {
+    public String getSimleName() {
         if (schema != null) {
             return schema;
         }

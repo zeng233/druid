@@ -22,7 +22,6 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.L
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitor;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-import com.alibaba.druid.util.JdbcConstants;
 
 public class MySqlDeleteStatement extends SQLDeleteStatement {
 
@@ -34,10 +33,6 @@ public class MySqlDeleteStatement extends SQLDeleteStatement {
     private SQLTableSource using;
     private SQLOrderBy     orderBy;
     private Limit          limit;
-    
-    public MySqlDeleteStatement() {
-        super (JdbcConstants.MYSQL);
-    }
 
     public boolean isLowPriority() {
         return lowPriority;

@@ -112,7 +112,7 @@ public class LogicalOperatorsTest extends TestCase {
 
         String text = output(stmtList);
 
-        Assert.assertEquals("SELECT !1 + 1;", text);
+        Assert.assertEquals("SELECT !(1 + 1);", text);
     }
 
     public void test_8() throws Exception {
@@ -156,7 +156,7 @@ public class LogicalOperatorsTest extends TestCase {
 
         String text = output(stmtList);
 
-        Assert.assertEquals("SELECT 0\n\tOR NULL;", text);
+        Assert.assertEquals("SELECT 0 || NULL;", text);
     }
 
     public void test_12() throws Exception {

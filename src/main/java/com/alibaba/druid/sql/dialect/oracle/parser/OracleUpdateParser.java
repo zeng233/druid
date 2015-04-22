@@ -103,7 +103,9 @@ public class OracleUpdateParser extends SQLStatementParser {
     }
 
     private void parseHints(OracleUpdateStatement update) {
-        this.exprParser.parseHints(update.getHints());
+        if (lexer.token() == Token.HINT) {
+            throw new ParserException("TODO");
+        }
     }
 
     private void parseWhere(OracleUpdateStatement update) {

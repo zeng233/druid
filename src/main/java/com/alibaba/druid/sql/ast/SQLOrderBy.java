@@ -15,11 +15,11 @@
  */
 package com.alibaba.druid.sql.ast;
 
-import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
-import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
+import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
 public class SQLOrderBy extends SQLObjectImpl {
 
@@ -32,13 +32,6 @@ public class SQLOrderBy extends SQLObjectImpl {
     public SQLOrderBy(SQLExpr expr){
         SQLSelectOrderByItem item = new SQLSelectOrderByItem(expr);
         item.setParent(this);
-        this.items.add(item);
-    }
-
-    public void addItem(SQLSelectOrderByItem item) {
-        if (item != null) {
-            item.setParent(this);
-        }
         this.items.add(item);
     }
 
@@ -58,7 +51,7 @@ public class SQLOrderBy extends SQLObjectImpl {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + items.hashCode();
+        result = prime * result + ((items == null) ? 0 : items.hashCode());
         return result;
     }
 
@@ -68,8 +61,10 @@ public class SQLOrderBy extends SQLObjectImpl {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         SQLOrderBy other = (SQLOrderBy) obj;
-        return items.equals(other.items);
+        if (items == null) {
+            if (other.items != null) return false;
+        } else if (!items.equals(other.items)) return false;
+        return true;
     }
-
 
 }

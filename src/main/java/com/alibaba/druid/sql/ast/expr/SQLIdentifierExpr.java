@@ -33,7 +33,7 @@ public class SQLIdentifierExpr extends SQLExprImpl implements SQLName {
         this.name = name;
     }
 
-    public String getSimpleName() {
+    public String getSimleName() {
         return name;
     }
 

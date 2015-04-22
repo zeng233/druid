@@ -67,13 +67,6 @@ public class SQLMethodInvokeExpr extends SQLExprImpl implements Serializable {
     public List<SQLExpr> getParameters() {
         return this.parameters;
     }
-    
-    public void addParameter(SQLExpr param) {
-        if (param != null) {
-            param.setParent(this);
-        }
-        this.parameters.add(param);
-    }
 
     public void output(StringBuffer buf) {
         if (this.owner != null) {

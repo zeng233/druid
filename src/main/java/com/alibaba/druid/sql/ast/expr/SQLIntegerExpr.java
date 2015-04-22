@@ -17,7 +17,7 @@ package com.alibaba.druid.sql.ast.expr;
 
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
-public class SQLIntegerExpr extends SQLNumericLiteralExpr implements SQLValuableExpr{
+public class SQLIntegerExpr extends SQLNumericLiteralExpr {
 
     private Number number;
 
@@ -76,10 +76,5 @@ public class SQLIntegerExpr extends SQLNumericLiteralExpr implements SQLValuable
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Object getValue() {
-        return this.number;
     }
 }

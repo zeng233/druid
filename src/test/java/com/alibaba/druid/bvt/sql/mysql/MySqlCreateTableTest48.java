@@ -48,7 +48,7 @@ public class MySqlCreateTableTest48 extends MysqlTest {
         System.out.println("orderBy : " + visitor.getOrderByColumns());
 
         Assert.assertEquals(3, visitor.getTables().size());
-        Assert.assertEquals(6, visitor.getColumns().size());
+        Assert.assertEquals(5, visitor.getColumns().size());
         Assert.assertEquals(0, visitor.getConditions().size());
 
         Assert.assertTrue(visitor.getTables().containsKey(new TableStat.Name("AO_E8B6CC_REPO_TO_CHANGESET")));
@@ -58,8 +58,8 @@ public class MySqlCreateTableTest48 extends MysqlTest {
                                     + "\n\tCHANGESET_ID INTEGER, "//
                                     + "\n\tID INTEGER AUTO_INCREMENT NOT NULL, "//
                                     + "\n\tREPOSITORY_ID INTEGER, "//
-                                    + "\n\tCONSTRAINT fk_ao_e8b6cc_repo_to_changeset_repository_id FOREIGN KEY (REPOSITORY_ID) REFERENCES AO_E8B6CC_REPOSITORY_MAPPING (ID), "//
-                                    + "\n\tCONSTRAINT fk_ao_e8b6cc_repo_to_changeset_changeset_id FOREIGN KEY (CHANGESET_ID) REFERENCES AO_E8B6CC_CHANGESET_MAPPING (ID), "//
+                                    + "\n\tCONSTRAINT fk_ao_e8b6cc_repo_to_changeset_repository_id FOREIGN KEY (ID) REFERENCES AO_E8B6CC_REPOSITORY_MAPPING (ID), "//
+                                    + "\n\tCONSTRAINT fk_ao_e8b6cc_repo_to_changeset_changeset_id FOREIGN KEY (ID) REFERENCES AO_E8B6CC_CHANGESET_MAPPING (ID), "//
                                     + "\n\tPRIMARY KEY (ID)"//
                                     + "\n) ENGINE = InnoDB",//
                             output);

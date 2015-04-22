@@ -36,7 +36,7 @@ public class ConnectionTest3 extends TestCase {
     private DruidDataSource dataSource;
 
     protected void setUp() throws Exception {
-        DruidDataSourceStatManager.clear();
+        DruidDataSourceStatManager.cear();
 
         driver = new MockDriver();
 

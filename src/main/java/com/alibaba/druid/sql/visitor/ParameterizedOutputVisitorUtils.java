@@ -24,16 +24,14 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLHexExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLLiteralExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNCharExpr;
-import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumberExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLAssignItem;
 import com.alibaba.druid.sql.ast.statement.SQLColumnDefinition;
-import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
 import com.alibaba.druid.sql.dialect.db2.visitor.DB2ParameterizedOutputVisitor;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlParameterizedOutputVisitor;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleParameterizedOutputVisitor;
@@ -55,18 +53,13 @@ public class ParameterizedOutputVisitorUtils {
             return sql;
         }
 
+        SQLStatement stmt = statementList.get(0);
+
         StringBuilder out = new StringBuilder();
         ParameterizedVisitor visitor = createParameterizedOutputVisitor(out, dbType);
+        stmt.accept(visitor);
 
-        for (int i = 0; i < statementList.size(); i++) {
-            if (i > 0) {
-                out.append(";\n");
-            }
-            SQLStatement stmt = statementList.get(i);
-            stmt.accept(visitor);
-        }
-
-        if (visitor.getReplaceCount() == 0 && !parser.getLexer().isHasComment()) {
+        if (visitor.getReplaceCount() == 0) {
             return sql;
         }
 
@@ -158,14 +151,13 @@ public class ParameterizedOutputVisitorUtils {
         if (Boolean.TRUE.equals(x.getAttribute(ParameterizedOutputVisitorUtils.ATTR_PARAMS_SKIP))) {
             return false;
         }
-
+        
         SQLObject parent = x.getParent();
 
         if (parent instanceof SQLDataType //
             || parent instanceof SQLColumnDefinition //
             || parent instanceof SQLServerTop //
-            //|| parent instanceof SQLAssignItem //
-            || parent instanceof SQLSelectOrderByItem //
+            || parent instanceof SQLAssignItem //
         ) {
             return false;
         }
@@ -179,34 +171,6 @@ public class ParameterizedOutputVisitorUtils {
         return false;
     }
 
-    public static boolean visit(ParameterizedVisitor v, SQLNullExpr x) {
-        SQLObject parent = x.getParent();
-        if (parent instanceof SQLBinaryOpExpr) {
-            SQLBinaryOpExpr binaryOpExpr = (SQLBinaryOpExpr) parent;
-            if (binaryOpExpr.getOperator() == SQLBinaryOperator.IsNot
-                || binaryOpExpr.getOperator() == SQLBinaryOperator.Is) {
-                v.print("NULL");
-                return false;
-            }
-        }
-
-        v.print('?');
-        v.incrementReplaceCunt();
-        return false;
-    }
-
-    public static boolean visit(ParameterizedVisitor v, SQLVariantRefExpr x) {
-        v.print('?');
-        v.incrementReplaceCunt();
-        return false;
-    }
-    
-    public static boolean visit(ParameterizedVisitor v, SQLHexExpr x) {
-        v.print('?');
-        v.incrementReplaceCunt();
-        return false;
-    }
-
     public static SQLBinaryOpExpr merge(ParameterizedVisitor v, SQLBinaryOpExpr x) {
         SQLExpr left = x.getLeft();
         SQLExpr right = x.getRight();
@@ -215,17 +179,8 @@ public class ParameterizedOutputVisitorUtils {
         if (left instanceof SQLLiteralExpr && right instanceof SQLLiteralExpr) {
             if (x.getOperator() == SQLBinaryOperator.Equality //
                 || x.getOperator() == SQLBinaryOperator.NotEqual) {
-                if((left instanceof SQLIntegerExpr) && (right instanceof SQLIntegerExpr) ) {
-                    if (((SQLIntegerExpr) left).getNumber().intValue() < 100) {
-                        left.putAttribute(ATTR_PARAMS_SKIP, true);
-                    }
-                    if (((SQLIntegerExpr) right).getNumber().intValue() < 100) {
-                        right.putAttribute(ATTR_PARAMS_SKIP, true);
-                    }
-                } else {
-                    left.putAttribute(ATTR_PARAMS_SKIP, true);
-                    right.putAttribute(ATTR_PARAMS_SKIP, true);
-                }
+                left.putAttribute(ATTR_PARAMS_SKIP, true);
+                right.putAttribute(ATTR_PARAMS_SKIP, true);
             }
             return x;
         }

@@ -20,18 +20,16 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.PGWithClause;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-import com.alibaba.druid.util.JdbcConstants;
 
 public class PGSelectStatement extends SQLSelectStatement implements PGSQLStatement {
 
     private PGWithClause with;
 
     public PGSelectStatement(){
-        super(JdbcConstants.POSTGRESQL);
     }
 
     public PGSelectStatement(SQLSelect select){
-        super(select, JdbcConstants.POSTGRESQL);
+        super(select);
     }
 
     public PGWithClause getWith() {

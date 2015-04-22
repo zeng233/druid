@@ -41,11 +41,6 @@ public class SQLServerLexer extends Lexer {
         map.put("WITH", Token.WITH);
         map.put("PERCENT", Token.PERCENT);
         map.put("IDENTITY", Token.IDENTITY);
-        map.put("DECLARE", Token.DECLARE);
-        map.put("IF", Token.IF);
-        map.put("ELSE", Token.ELSE);
-        map.put("BEGIN", Token.BEGIN);
-        map.put("END", Token.END);
 
         DEFAULT_SQL_SERVER_KEYWORDS = new Keywords(map);
     }
@@ -105,14 +100,17 @@ public class SQLServerLexer extends Lexer {
             } else {
                 stringVal = subString(mark, bufPos);
                 token = Token.MULTI_LINE_COMMENT;
-                hasComment = true;
             }
 
-            if (token != Token.HINT && !isAllowComment() && !isSafeComment(stringVal)) {
+            if (token != Token.HINT && !isAllowComment()) {
                 throw new NotAllowCommentException();
             }
 
             return;
+        }
+
+        if (!isAllowComment()) {
+            throw new NotAllowCommentException();
         }
 
         if (ch == '/' || ch == '-') {
@@ -144,12 +142,6 @@ public class SQLServerLexer extends Lexer {
 
             stringVal = subString(mark + 1, bufPos);
             token = Token.LINE_COMMENT;
-            hasComment = true;
-            endOfComment = isEOF();
-            
-            if (!isAllowComment() && (isEOF() || !isSafeComment(stringVal))) {
-                throw new NotAllowCommentException();
-            }
             return;
         }
     }
